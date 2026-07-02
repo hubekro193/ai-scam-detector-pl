@@ -32,6 +32,19 @@ export const detectContextRisk: Detector = (_text, normalized) => {
     });
   }
 
+  // Vague delivery/address problem — same "unverifiable pretext" pattern as
+  // the account-issue signal above, just about an address instead of an account.
+  if (/(brak (numeru )?ulicy|brak kodu pocztowego|nieprawidlowy adres dostawy|uzupelnij adres|zaktualizuj (informacje o wysylce|dane adresowe))/.test(normalized)) {
+    signals.push({
+      id: "context.vague-address-issue",
+      category: "context",
+      severity: "medium",
+      label: "Niesprecyzowany \"problem z adresem\"",
+      explanation:
+        "Wiadomość ogólnikowo informuje o problemie z adresem/dostawą, bez konkretnych danych zamówienia, i namawia do kliknięcia linku, by to \"naprawić\" — typowy pretekst w phishingu kurierskim.",
+    });
+  }
+
   // Mentions an order/parcel but gives no order/tracking number to verify against.
   const mentionsOrderOrParcel = /(zamowien|przesylk|paczk)/.test(normalized);
   const hasTrackingNumber = /\b\d{4,}\b/.test(normalized);

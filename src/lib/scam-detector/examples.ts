@@ -65,4 +65,23 @@ export const TEST_MESSAGES: TestMessage[] = [
     expectedLevel: "Low",
     message: "Hej, jak minal weekend? Widzimy sie jutro na tym samym miejscu co zwykle?",
   },
+  {
+    // Sanitized regression test for a real message a user tested manually —
+    // written with proper Polish diacritics (including "ł") on purpose, to
+    // guard against the normalize() bug found in Module 10 evaluation.
+    id: "dhl-customs-fee-real-diacritics",
+    label: "DHL: rzekoma opłata celna (pełne polskie znaki)",
+    expectedLevel: "Critical",
+    message:
+      "DHL Express: Twoja paczka została wstrzymana z powodu brakującej opłaty celnej w wysokości 2,99 zł. Jeśli opłata nie zostanie uregulowana dzisiaj do godz. 18:00, przesyłka zostanie zwrócona do nadawcy. Aby potwierdzić dostawę, przejdź do formularza: https://dhl-paczka24.example.com/oplata/PL-839204 Numer przesyłki: DHL489203771PL",
+  },
+  {
+    // Sanitized regression test for a real defanged IOC a user pasted
+    // (hxxps://... [.] notation) — exercises refang() in utils.ts.
+    id: "inpost-address-issue-defanged",
+    label: "InPost: fałszywy problem z adresem (link w formie zdefangowanej)",
+    expectedLevel: "High",
+    message:
+      "Twoja paczka została wstrzymana z powodu braku numeru ulicy na paczce. Zaktualizuj informacje o wysyłce: hxxps://inpost-weryfikacja[.]example[.]com/PL",
+  },
 ];

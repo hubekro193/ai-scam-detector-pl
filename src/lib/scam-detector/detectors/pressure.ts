@@ -19,7 +19,7 @@ const PATTERNS: Pattern[] = [
   },
   {
     id: "pressure.deadline-short",
-    regex: /(w ciagu (\d+ )?(minut|godzin)|w ciagu \d+\s*h\b|masz (\d+ )?(minut|godzin)|do konca dnia|dzis do godziny)/,
+    regex: /(w ciagu (\d+ )?(minut|godzin)|w ciagu \d+\s*h\b|masz (\d+ )?(minut|godzin)|do konca dnia|dzis(iaj)? do godz\w*\.?\s*\d+)/,
     severity: "high",
     label: "Bardzo krótki termin na reakcję",
     explanation:

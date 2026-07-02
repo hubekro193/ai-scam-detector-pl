@@ -41,6 +41,14 @@ const PATTERNS: Pattern[] = [
     explanation:
       "Prośba o dodatkową opłatę za dostawę, o której nie było mowy wcześniej — typowy scam \"na kuriera\" wykorzystujący fałszywą stronę płatności.",
   },
+  {
+    id: "payment.customs-fee",
+    regex: /(oplat\w* celn\w*|\bclo\b|podatek importowy|oplata celna)/,
+    severity: "high",
+    label: "Rzekoma opłata celna",
+    explanation:
+      "Wiadomość żąda drobnej \"opłaty celnej\" za przesyłkę — częsty wariant scamu kurierskiego, szczególnie przy rzekomych paczkach z zagranicy. Prawdziwe cło nie jest pobierane w ten sposób.",
+  },
 ];
 
 export const detectPaymentRisk: Detector = (_text, normalized) => {

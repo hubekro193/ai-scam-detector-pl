@@ -43,7 +43,7 @@ const PATTERNS: Pattern[] = [
   },
   {
     id: "identity.sender-prefix",
-    regex: /^(inpost|dpd|dhl|allegro|olx|poczta polska|blik)\s*[:\-]/,
+    regex: /^(inpost|dpd|dhl|allegro|olx|poczta polska|blik)(\s+\w+){0,2}\s*[:\-]/,
     severity: "low",
     label: "Wiadomość podszywa się pod znaną markę w nagłówku",
     explanation:

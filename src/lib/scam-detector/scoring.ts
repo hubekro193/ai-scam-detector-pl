@@ -95,7 +95,26 @@ function buildSummary(triggeredCategories: RiskCategory[], riskLevel: RiskLevel)
   return `Ta wiadomość wykazuje ${riskWord[riskLevel]} oszustwa — zawiera: ${list}.`;
 }
 
-function buildRecommendedActions(triggeredCategories: RiskCategory[]): string[] {
+/**
+ * Context-category signals are heterogeneous (platform bypass vs. a vague
+ * account warning vs. a missing order number are very different situations),
+ * so — unlike the other categories — it needs signal-specific action text
+ * instead of one generic line. A weak corroborating signal like
+ * "missing order number" doesn't get its own action line: it's supporting
+ * evidence, not something actionable on its own.
+ */
+function contextAction(signals: Signal[]): string | null {
+  const ids = new Set(signals.filter((s) => s.category === "context").map((s) => s.id));
+  if (ids.has("context.platform-bypass")) {
+    return "Nie przenoś rozmowy poza oficjalną platformę (np. z OLX/Allegro na WhatsApp).";
+  }
+  if (ids.has("context.vague-account-issue")) {
+    return "Zweryfikuj sprawę logując się bezpośrednio w oficjalnej aplikacji — nie przez link ani numer z wiadomości.";
+  }
+  return null;
+}
+
+function buildRecommendedActions(signals: Signal[], triggeredCategories: RiskCategory[]): string[] {
   if (triggeredCategories.length === 0) {
     return [
       "Wiadomość nie wykazuje typowych sygnałów oszustwa, ale zawsze zachowuj ostrożność przy nietypowych prośbach o dane lub płatności.",
@@ -104,7 +123,8 @@ function buildRecommendedActions(triggeredCategories: RiskCategory[]): string[] 
 
   const actions = triggeredCategories
     .filter((c) => c !== "language") // language alone rarely warrants its own action line
-    .map((c) => RECOMMENDED_ACTIONS_BY_CATEGORY[c]);
+    .map((c) => (c === "context" ? contextAction(signals) : RECOMMENDED_ACTIONS_BY_CATEGORY[c]))
+    .filter((a): a is string => a !== null);
 
   actions.push(
     "W razie wątpliwości zgłoś wiadomość i zablokuj nadawcę. To narzędzie pomaga ocenić ryzyko, ale nie daje gwarancji — zawsze weryfikuj ważne sprawy oficjalnym kanałem."
@@ -137,7 +157,7 @@ export function scoreSignals(signals: Signal[]): DetectionResult {
 
   const confidence = computeConfidence(signals, triggeredCategories);
   const summary = buildSummary(triggeredCategories, riskLevel);
-  const recommendedAction = buildRecommendedActions(triggeredCategories);
+  const recommendedAction = buildRecommendedActions(signals, triggeredCategories);
 
   return {
     riskLevel,

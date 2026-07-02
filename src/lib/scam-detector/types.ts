@@ -42,6 +42,8 @@ export interface DetectionResult {
   detectedSignals: Signal[];
   recommendedAction: string[];
   confidence: Confidence;
+  /** Whether `summary` came from the Claude explanation layer (Module 6) or is the raw rule-based sentence. */
+  explanationSource?: "ai" | "rule-based";
   /** Technical details for advanced users — never shown by default in the UI. */
   technical: {
     categoryScores: Record<RiskCategory, number>;
