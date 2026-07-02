@@ -93,4 +93,24 @@ export const TEST_MESSAGES: TestMessage[] = [
     message:
       "DPD - Powiadomienie o próbie doręczenia: Dzisiaj o godz. 10:02 nasz kurier Piotr Laskowski (ID: DPD-3721) próbował dostarczyć paczkę, ale nie udało się tego zrobić, ponieważ nie udało się skontaktować z odbiorcą. Umów ponowną dostawę na naszej stronie internetowej: https://dpd-example.example.link/pl (Odpowiedz „Y\", a następnie zamknij i ponownie otwórz wiadomość SMS, aby aktywować link.)",
   },
+  {
+    // Same activation-trick pattern, differently worded ("odpowiedziec" not
+    // "odpowiedz", "zakoncz" not "zamknij", "link aktywacyjny" not "aktywowac
+    // link") — a real variant a user tested that the first, narrower regex missed.
+    id: "dpd-reply-y-activation-trick-variant",
+    label: "DPD: wariant techniki aktywacyjnej (inne sformułowanie)",
+    expectedLevel: "Critical",
+    message:
+      "DPD: Dzień dobry, nasz kurier tymczasowo nie mógł umieścić Państwa przesyłki w paczkomacie. Prosimy o ponowne umówienie dostawy: https://moj-dpd.example.com (Proszę odpowiedzieć Y. Następnie zakończ wiadomość i ponownie otwórz link aktywacyjny lub skopiuj go do przeglądarki Safari i otwórz.)",
+  },
+  {
+    // True-negative regression: a plausible, benign courier confirmation
+    // request. No link, no payment/data ask, no pressure — should stay Low.
+    // Guards against future regex additions becoming over-broad.
+    id: "legit-delivery-confirmation-request",
+    label: "Legalne pytanie o potwierdzenie obecności przy dostawie",
+    expectedLevel: "Low",
+    message:
+      "Dzien dobry, na jutro (04.10.2024) okolo godziny 11:00-13:00 planowana jest dostawa przesylki z wniesieniem. Prosimy o potwierdzenie smsem zwrotnym czy pod adresem kurierzy zastana kogos w tym terminie. Pozdrawiamy, AmbroExpress",
+  },
 ];

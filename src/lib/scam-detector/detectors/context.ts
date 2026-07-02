@@ -52,7 +52,7 @@ export const detectContextRisk: Detector = (_text, normalized) => {
   // are bypassed. No legitimate courier/bank ever needs you to "activate" a
   // link this way — this phrasing alone is a near-certain scam signature.
   if (
-    /(aby aktywowac (link|wiadomosc)|zamknij i (ponownie )?otworz (wiadomosc|sms)|odpowiedz\s*[„"']?[a-z]{1,3}[„"']?\s*,?\s*a nastepnie)/.test(
+    /(aktyw\w*.{0,30}(link|wiadomos\w*|sms)|(zamknij|zakoncz)\w*.{0,40}otworz\w*.{0,20}(wiadomos\w*|sms|link)|odpowiedz\w*\s*[„"']?[a-z]{1,3}[„"']?\W{0,3}(a\s+)?nastepnie)/.test(
       normalized
     )
   ) {
