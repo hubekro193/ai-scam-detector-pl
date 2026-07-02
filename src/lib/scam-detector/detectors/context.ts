@@ -45,6 +45,27 @@ export const detectContextRisk: Detector = (_text, normalized) => {
     });
   }
 
+  // "Reply Y, then close and reopen the SMS to activate the link" — a
+  // well-documented smishing technique (used by real SMS-worm campaigns
+  // impersonating couriers across Europe) designed to get the recipient to
+  // interact with the message so carrier/OS spam filters and link previews
+  // are bypassed. No legitimate courier/bank ever needs you to "activate" a
+  // link this way — this phrasing alone is a near-certain scam signature.
+  if (
+    /(aby aktywowac (link|wiadomosc)|zamknij i (ponownie )?otworz (wiadomosc|sms)|odpowiedz\s*[„"']?[a-z]{1,3}[„"']?\s*,?\s*a nastepnie)/.test(
+      normalized
+    )
+  ) {
+    signals.push({
+      id: "context.interaction-trick",
+      category: "context",
+      severity: "critical",
+      label: "Prośba o \"aktywację\" linku przez odpowiedź/zamknięcie SMS-a",
+      explanation:
+        "Wiadomość prosi o odpowiedź jednym znakiem i zamknięcie/ponowne otwarcie SMS-a, by \"aktywować\" link. To znana technika stosowana w kampaniach smishingowych, mająca ominąć filtry antyspamowe operatora i skłonić Cię do interakcji z wiadomością. Żaden legalny kurier ani bank tego nie wymaga.",
+    });
+  }
+
   // Mentions an order/parcel but gives no order/tracking number to verify against.
   const mentionsOrderOrParcel = /(zamowien|przesylk|paczk)/.test(normalized);
   const hasTrackingNumber = /\b\d{4,}\b/.test(normalized);

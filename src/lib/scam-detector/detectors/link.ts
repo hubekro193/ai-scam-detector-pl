@@ -28,7 +28,27 @@ const BRANDS: { name: string; keywords: string[]; officialDomains: string[] }[] 
   { name: "Santander", keywords: ["santander"], officialDomains: ["santander.pl"] },
 ];
 
-const SUSPICIOUS_TLDS = [".xyz", ".top", ".club", ".info", ".site", ".online", ".click", ".buzz"];
+const SUSPICIOUS_TLDS = [
+  ".xyz",
+  ".top",
+  ".club",
+  ".info",
+  ".site",
+  ".online",
+  ".click",
+  ".buzz",
+  ".link",
+  ".icu",
+  ".cfd",
+  ".live",
+  ".cc",
+  ".cyou",
+  ".gq",
+  ".tk",
+  ".ml",
+  ".cam",
+  ".rest",
+];
 
 export const detectLinkRisk: Detector = (text, normalized) => {
   const signals: Signal[] = [];

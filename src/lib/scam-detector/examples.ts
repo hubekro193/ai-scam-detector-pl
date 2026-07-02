@@ -84,4 +84,13 @@ export const TEST_MESSAGES: TestMessage[] = [
     message:
       "Twoja paczka została wstrzymana z powodu braku numeru ulicy na paczce. Zaktualizuj informacje o wysyłce: hxxps://inpost-weryfikacja[.]example[.]com/PL",
   },
+  {
+    // Sanitized regression test for a real "reply Y, close/reopen SMS to
+    // activate the link" smishing message a user tested manually.
+    id: "dpd-reply-y-activation-trick",
+    label: "DPD: technika \"odpowiedz Y i aktywuj link\"",
+    expectedLevel: "Critical",
+    message:
+      "DPD - Powiadomienie o próbie doręczenia: Dzisiaj o godz. 10:02 nasz kurier Piotr Laskowski (ID: DPD-3721) próbował dostarczyć paczkę, ale nie udało się tego zrobić, ponieważ nie udało się skontaktować z odbiorcą. Umów ponowną dostawę na naszej stronie internetowej: https://dpd-example.example.link/pl (Odpowiedz „Y\", a następnie zamknij i ponownie otwórz wiadomość SMS, aby aktywować link.)",
+  },
 ];

@@ -105,6 +105,9 @@ function buildSummary(triggeredCategories: RiskCategory[], riskLevel: RiskLevel)
  */
 function contextAction(signals: Signal[]): string | null {
   const ids = new Set(signals.filter((s) => s.category === "context").map((s) => s.id));
+  if (ids.has("context.interaction-trick")) {
+    return "Nie odpowiadaj na tę wiadomość i nie klikaj linku — to nie jest realny sposób na 'aktywację' wiadomości SMS.";
+  }
   if (ids.has("context.platform-bypass")) {
     return "Nie przenoś rozmowy poza oficjalną platformę (np. z OLX/Allegro na WhatsApp).";
   }
