@@ -7,6 +7,7 @@ import type { DetectionResult, Signal } from "./types";
 export * from "./types";
 export { scoreSignals } from "./scoring";
 export { explainWithAI } from "./ai/explain";
+export * from "./schemas";
 
 /**
  * Analyze a raw Polish-language message and return a structured risk assessment.

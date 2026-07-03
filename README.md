@@ -2,7 +2,7 @@
 
 Silnik do oceny ryzyka oszustwa/phishingu w polskojęzycznych wiadomościach (SMS, e-mail, OLX, Allegro, WhatsApp, kurier/bank).
 
-**Status: Moduły 5-7 (silnik regułowy, AI-assisted explanation, frontend Next.js) i Moduł 11 (prywatność/bezpieczeństwo) ukończone.** Ewaluacja trwa na bieżąco (Moduł 10) — silnik jest testowany na realnych wiadomościach, nie tylko na wymyślonych przykładach.
+**Status: Moduły 5-8 (silnik regułowy, AI-assisted explanation, frontend Next.js, structured output + walidacja Zod) i Moduł 11 (prywatność/bezpieczeństwo) ukończone.** Ewaluacja trwa na bieżąco (Moduł 10) — silnik jest testowany na realnych wiadomościach, nie tylko na wymyślonych przykładach.
 
 ## Architektura — dlaczego rules + AI, nie tylko AI
 
@@ -23,6 +23,7 @@ src/lib/scam-detector/
   utils.ts             — normalizacja tekstu, ekstrakcja URL (w tym refang() dla zdefangowanych linków)
   detectors/           — 7 niezależnych detektorów (link, identity, pressure, data, payment, language, context)
   scoring.ts           — agregacja sygnałów w riskScore/riskLevel/confidence + rekomendowane działania
+  schemas.ts           — schematy Zod: walidacja requestu API + kontraktowy test kształtu DetectionResult
   ai/
     client.ts           — leniwie tworzony klient Anthropic (null jeśli brak klucza)
     explain.ts           — wysyła TYLKO sygnały (nie treść wiadomości) do Claude, zwraca naturalne wyjaśnienie PL
