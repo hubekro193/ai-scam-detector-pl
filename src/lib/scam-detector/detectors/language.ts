@@ -1,4 +1,4 @@
-import type { Detector, Signal } from "../types.js";
+import type { Detector, Signal } from "../types";
 
 /**
  * Language/grammar signals are intentionally kept at low-medium severity.

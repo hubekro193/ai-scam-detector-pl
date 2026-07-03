@@ -1,4 +1,4 @@
-import type { Detector, Signal } from "../types.js";
+import type { Detector, Signal } from "../types";
 
 export const detectContextRisk: Detector = (_text, normalized) => {
   const signals: Signal[] = [];

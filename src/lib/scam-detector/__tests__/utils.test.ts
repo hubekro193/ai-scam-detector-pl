@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalize, extractUrls } from "../utils.js";
+import { normalize, extractUrls } from "../utils";
 
 describe("normalize() — Polish letter handling (Module 10 regression)", () => {
   it("converts 'ł' to 'l', since NFD does not decompose it on its own", () => {

@@ -4,8 +4,8 @@ import type {
   RiskCategory,
   RiskLevel,
   Signal,
-} from "./types.js";
-import { SEVERITY_WEIGHT } from "./types.js";
+} from "./types";
+import { SEVERITY_WEIGHT } from "./types";
 
 const ALL_CATEGORIES: RiskCategory[] = [
   "link",

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyzeMessage } from "../index.js";
-import { TEST_MESSAGES } from "../examples.js";
+import { analyzeMessage } from "../index";
+import { TEST_MESSAGES } from "../examples";
 
 describe("analyzeMessage — rule-based engine (Module 5)", () => {
   for (const test of TEST_MESSAGES) {

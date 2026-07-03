@@ -5,19 +5,31 @@
   "description": "AI Scam Detector PL — rule-based + AI-assisted phishing/scam risk detector for Polish-language messages (SMS, email, OLX, Allegro, WhatsApp).",
   "type": "module",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
     "demo": "tsx src/lib/scam-detector/demo.ts",
     "check": "tsx src/cli/check.ts"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.2",
     "@types/node": "^20.14.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.5.2",
+    "postcss": "^8.5.16",
+    "tailwindcss": "^4.3.2",
     "tsx": "^4.16.0",
     "typescript": "^5.5.0",
     "vitest": "^2.0.0"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.109.1",
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "next": "^16.2.10",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   }
 }

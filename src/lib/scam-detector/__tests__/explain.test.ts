@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { analyzeMessage } from "../index.js";
-import { explainWithAI } from "../ai/explain.js";
-import { _resetClientCache } from "../ai/client.js";
+import { analyzeMessage } from "../index";
+import { explainWithAI } from "../ai/explain";
+import { _resetClientCache } from "../ai/client";
 
 describe("explainWithAI — Module 6 fallback behavior (offline, no API key)", () => {
   afterEach(() => {

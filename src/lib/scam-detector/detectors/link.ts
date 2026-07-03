@@ -1,5 +1,5 @@
-import type { Detector, Signal } from "../types.js";
-import { extractUrls } from "../utils.js";
+import type { Detector, Signal } from "../types";
+import { extractUrls } from "../utils";
 
 const SHORTENERS = [
   "bit.ly",

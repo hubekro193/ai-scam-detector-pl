@@ -1,12 +1,12 @@
-import { ALL_DETECTORS } from "./detectors/index.js";
-import { scoreSignals } from "./scoring.js";
-import { normalize } from "./utils.js";
-import { explainWithAI } from "./ai/explain.js";
-import type { DetectionResult, Signal } from "./types.js";
+import { ALL_DETECTORS } from "./detectors/index";
+import { scoreSignals } from "./scoring";
+import { normalize } from "./utils";
+import { explainWithAI } from "./ai/explain";
+import type { DetectionResult, Signal } from "./types";
 
-export * from "./types.js";
-export { scoreSignals } from "./scoring.js";
-export { explainWithAI } from "./ai/explain.js";
+export * from "./types";
+export { scoreSignals } from "./scoring";
+export { explainWithAI } from "./ai/explain";
 
 /**
  * Analyze a raw Polish-language message and return a structured risk assessment.

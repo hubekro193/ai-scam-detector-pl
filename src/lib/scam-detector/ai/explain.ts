@@ -1,5 +1,5 @@
-import type { DetectionResult } from "../types.js";
-import { getAnthropicClient } from "./client.js";
+import type { DetectionResult } from "../types";
+import { getAnthropicClient } from "./client";
 
 const DEFAULT_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-haiku-4-5-20251001";
 const DEFAULT_TIMEOUT_MS = 8000;

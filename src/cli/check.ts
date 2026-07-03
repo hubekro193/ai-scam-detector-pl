@@ -7,7 +7,7 @@
  *   npm run check              (then paste + Ctrl-D)
  */
 import "dotenv/config";
-import { explainMessage } from "../lib/scam-detector/index.js";
+import { explainMessage } from "../lib/scam-detector/index";
 
 async function readStdin(): Promise<string> {
   const chunks: Buffer[] = [];

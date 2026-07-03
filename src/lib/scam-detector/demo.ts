@@ -1,5 +1,5 @@
-import { analyzeMessage } from "./index.js";
-import { TEST_MESSAGES } from "./examples.js";
+import { analyzeMessage } from "./index";
+import { TEST_MESSAGES } from "./examples";
 
 for (const test of TEST_MESSAGES) {
   const result = analyzeMessage(test.message);

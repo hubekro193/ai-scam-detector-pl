@@ -2,7 +2,7 @@
 
 Silnik do oceny ryzyka oszustwa/phishingu w polskojęzycznych wiadomościach (SMS, e-mail, OLX, Allegro, WhatsApp, kurier/bank).
 
-**Status: Moduł 5 (rule-based scoring) + Moduł 6 (AI-assisted explanation) ukończone.** Frontend to kolejny krok (Moduł 7).
+**Status: Moduł 5 (rule-based scoring), Moduł 6 (AI-assisted explanation) i Moduł 7 (frontend Next.js) ukończone.** Ewaluacja trwa na bieżąco (Moduł 10) — silnik jest testowany na realnych wiadomościach, nie tylko na wymyślonych przykładach.
 
 ## Architektura — dlaczego rules + AI, nie tylko AI
 
@@ -13,16 +13,21 @@ Warstwa AI (`explainMessage`, Moduł 6) jest **czysto opisowa** — dostaje tylk
 ## Struktura
 
 ```
+app/
+  page.tsx             — główny UI: textarea, wynik, przykłady do wypróbowania
+  layout.tsx           — layout + metadata
+  globals.css          — Tailwind v4
+  api/check/route.ts   — jedyne miejsce, gdzie wywoływany jest explainMessage() po stronie serwera
 src/lib/scam-detector/
   types.ts            — typy: Signal, DetectionResult, RiskCategory, Severity...
-  utils.ts             — normalizacja tekstu, ekstrakcja URL
+  utils.ts             — normalizacja tekstu, ekstrakcja URL (w tym refang() dla zdefangowanych linków)
   detectors/           — 7 niezależnych detektorów (link, identity, pressure, data, payment, language, context)
   scoring.ts           — agregacja sygnałów w riskScore/riskLevel/confidence + rekomendowane działania
   ai/
     client.ts           — leniwie tworzony klient Anthropic (null jeśli brak klucza)
     explain.ts           — wysyła TYLKO sygnały (nie treść wiadomości) do Claude, zwraca naturalne wyjaśnienie PL
   index.ts             — analyzeMessage(text) [sync, offline] i explainMessage(text) [async, + AI]
-  examples.ts          — bezpieczne, fikcyjne przykłady testowe
+  examples.ts          — bezpieczne, fikcyjne przykłady testowe (w tym sanitizowane regresje z realnych scamów)
   demo.ts              — skrypt uruchamiający silnik na przykładach
   __tests__/           — testy vitest (offline, bez potrzeby klucza API)
 src/cli/
@@ -54,9 +59,11 @@ Bez klucza aplikacja działa normalnie — po prostu używa wyjaśnień z silnik
 
 ```
 npm install
-npm run demo              # uruchamia silnik na 7 przykładowych wiadomościach
-npm run check -- "treść"  # sprawdź własną wiadomość (interaktywne CLI)
-npm test                  # testy jednostkowe (vitest), zawsze offline
+npm run dev                # uruchamia aplikację webową na http://localhost:3000
+npm run build               # build produkcyjny (Next.js)
+npm run demo                 # uruchamia silnik na przykładowych wiadomościach (CLI)
+npm run check -- "treść"     # sprawdź własną wiadomość (interaktywne CLI, bez UI)
+npm test                     # testy jednostkowe (vitest), zawsze offline
 ```
 
 ## Zasada projektowa
