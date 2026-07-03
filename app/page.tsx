@@ -3,36 +3,65 @@
 import { useState } from "react";
 import { TEST_MESSAGES } from "@/lib/scam-detector/examples";
 import type { DetectionResult, RiskLevel } from "@/lib/scam-detector/types";
+import { ScoreRing } from "./components/ScoreRing";
+import { Faq } from "./components/Faq";
 
 const EXAMPLE_IDS = ["courier-topup-scam", "blik-friend-scam", "legit-parcel-notification"];
 const EXAMPLES = TEST_MESSAGES.filter((m) => EXAMPLE_IDS.includes(m.id));
 
-const RISK_STYLES: Record<RiskLevel, { badge: string; card: string; icon: string; word: string }> = {
+const RISK_STYLES: Record<
+  RiskLevel,
+  { badge: string; card: string; icon: string; word: string }
+> = {
   Low: {
     badge: "bg-emerald-100 text-emerald-800 border-emerald-300",
-    card: "border-emerald-200 bg-emerald-50",
+    card: "border-emerald-200 bg-emerald-50/60",
     icon: "🟢",
     word: "Niskie ryzyko",
   },
   Medium: {
     badge: "bg-amber-100 text-amber-800 border-amber-300",
-    card: "border-amber-200 bg-amber-50",
+    card: "border-amber-200 bg-amber-50/60",
     icon: "🟡",
     word: "Umiarkowane ryzyko",
   },
   High: {
     badge: "bg-orange-100 text-orange-800 border-orange-300",
-    card: "border-orange-200 bg-orange-50",
+    card: "border-orange-200 bg-orange-50/60",
     icon: "🟠",
     word: "Wysokie ryzyko",
   },
   Critical: {
     badge: "bg-red-100 text-red-800 border-red-300",
-    card: "border-red-200 bg-red-50",
+    card: "border-red-200 bg-red-50/60",
     icon: "🔴",
     word: "Bardzo wysokie ryzyko",
   },
 };
+
+const HOW_IT_WORKS = [
+  {
+    step: "01",
+    title: "Wklej wiadomość",
+    text: "Skopiuj podejrzanego SMS-a, e-mail lub wiadomość z czatu OLX, Allegro czy WhatsApp.",
+  },
+  {
+    step: "02",
+    title: "Analizujemy sygnały ryzyka",
+    text: "Sprawdzamy linki, presję czasu, prośby o dane, próby podszycia się pod firmę i inne typowe wzorce.",
+  },
+  {
+    step: "03",
+    title: "Dostajesz jasny wynik",
+    text: "Poziom ryzyka, wyjaśnienie prostym językiem i konkretne zalecenie, co zrobić dalej.",
+  },
+];
+
+const PROJECT_FACTS = [
+  { value: "7", label: "kategorii sygnałów ryzyka" },
+  { value: "Reguły + AI", label: "silnik regułowy jako źródło prawdy, AI tylko wyjaśnia" },
+  { value: "0", label: "wiadomości zapisywanych na serwerze" },
+];
 
 export default function HomePage() {
   const [message, setMessage] = useState("");
@@ -71,129 +100,197 @@ export default function HomePage() {
   const styles = result ? RISK_STYLES[result.riskLevel] : null;
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">AI Scam Detector PL</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Wklej treść podejrzanego SMS-a, e-maila lub wiadomości z OLX/Allegro/WhatsApp, a sprawdzimy
-          typowe sygnały oszustwa.
-        </p>
+    <div className="bg-gradient-to-b from-indigo-50 via-white to-white">
+      {/* Header */}
+      <header className="mx-auto flex max-w-4xl items-center justify-between px-4 py-6">
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
+            ✓
+          </span>
+          <span className="font-semibold text-slate-900">AI Scam Detector PL</span>
+        </div>
+        <span className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+          Wersja beta
+        </span>
       </header>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Wklej tutaj treść wiadomości..."
-          rows={7}
-          maxLength={4000}
-          className="w-full resize-y rounded-lg border border-slate-300 bg-white p-3 text-sm shadow-sm focus:border-slate-500 focus:outline-none"
-        />
+      <main className="mx-auto max-w-4xl px-4 pb-20">
+        {/* Hero */}
+        <section className="pt-8 text-center sm:pt-14">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+            Zanim klikniesz — <span className="text-indigo-600">sprawdź, czy to nie scam.</span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-xl text-base text-slate-600 sm:text-lg">
+            Wklej treść SMS-a, e-maila lub wiadomości z OLX/Allegro. Analiza zajmuje kilka sekund —
+            bez rejestracji i bez zapisywania danych.
+          </p>
+        </section>
 
-        <p className="text-xs text-slate-500">
-          Nie wklejaj haseł, kodów BLIK, numerów kart, CVV ani numeru PESEL — do analizy wystarczy
-          treść samej wiadomości.
-        </p>
+        {/* Check form card */}
+        <section className="mx-auto mt-8 max-w-2xl rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-slate-200/50 sm:p-7">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Wklej tutaj treść wiadomości..."
+              rows={7}
+              maxLength={4000}
+              className="w-full resize-y rounded-lg border border-slate-300 bg-white p-3 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="submit"
-            disabled={!message.trim() || loading}
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {loading ? "Sprawdzam..." : "Sprawdź wiadomość"}
-          </button>
-
-          <span className="text-xs text-slate-400">lub wypróbuj przykład:</span>
-          {EXAMPLES.map((ex) => (
-            <button
-              key={ex.id}
-              type="button"
-              onClick={() => setMessage(ex.message)}
-              className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 hover:bg-slate-100"
-            >
-              {ex.label}
-            </button>
-          ))}
-        </div>
-      </form>
-
-      {error && (
-        <div className="mt-6 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800">
-          {error}
-        </div>
-      )}
-
-      {result && styles && (
-        <section className={`mt-6 rounded-xl border p-5 ${styles.card}`}>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold ${styles.badge}`}
-            >
-              {styles.icon} {styles.word} — {result.riskScore}/100
-            </span>
-            <span className="text-xs text-slate-500">Pewność oceny: {result.confidence}</span>
-          </div>
-
-          <p className="mt-4 text-sm leading-relaxed text-slate-800">{result.summary}</p>
-
-          {result.detectedSignals.length > 0 && (
-            <ul className="mt-4 space-y-1.5">
-              {result.detectedSignals.map((s) => (
-                <li key={s.id} className="text-sm text-slate-700">
-                  <span className="font-medium">{s.label}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <div className="mt-4 rounded-lg bg-white/70 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Co zrobić
+            <p className="text-xs text-slate-500">
+              Nie wklejaj haseł, kodów BLIK, numerów kart, CVV ani numeru PESEL — do analizy
+              wystarczy treść samej wiadomości.
             </p>
-            <ul className="mt-1.5 list-disc space-y-1 pl-4 text-sm text-slate-700">
-              {result.recommendedAction.map((a, i) => (
-                <li key={i}>{a}</li>
-              ))}
-            </ul>
-          </div>
 
-          {result.detectedSignals.length > 0 && (
-            <div className="mt-4">
+            <div className="flex flex-wrap items-center gap-2 pt-1">
               <button
-                type="button"
-                onClick={() => setShowTechnical((v) => !v)}
-                className="text-xs font-medium text-slate-500 underline decoration-dotted hover:text-slate-700"
+                type="submit"
+                disabled={!message.trim() || loading}
+                className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {showTechnical ? "Ukryj szczegóły techniczne" : "Pokaż szczegóły techniczne"}
+                {loading ? "Sprawdzam..." : "Sprawdź wiadomość"}
               </button>
 
-              {showTechnical && (
-                <div className="mt-2 space-y-2 rounded-lg border border-slate-200 bg-white/70 p-3">
-                  {result.detectedSignals.map((s) => (
-                    <div key={s.id} className="text-xs text-slate-600">
-                      <span className="font-mono text-slate-400">
-                        [{s.category}/{s.severity}]
-                      </span>{" "}
-                      <span className="font-medium text-slate-700">{s.label}</span>
-                      <p className="mt-0.5">{s.explanation}</p>
-                      {s.evidence && <p className="mt-0.5 italic text-slate-500">„{s.evidence}"</p>}
-                    </div>
-                  ))}
-                  <p className="pt-1 text-[11px] text-slate-400">
-                    Źródło wyjaśnienia: {result.explanationSource === "ai" ? "AI (Claude)" : "silnik regułowy"}
-                  </p>
-                </div>
-              )}
+              <span className="text-xs text-slate-400">lub wypróbuj przykład:</span>
+              {EXAMPLES.map((ex) => (
+                <button
+                  key={ex.id}
+                  type="button"
+                  onClick={() => setMessage(ex.message)}
+                  className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
+                >
+                  {ex.label}
+                </button>
+              ))}
+            </div>
+          </form>
+
+          {error && (
+            <div className="mt-5 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800">
+              {error}
             </div>
           )}
-        </section>
-      )}
 
-      <footer className="mt-10 border-t border-slate-200 pt-4 text-xs text-slate-400">
-        To narzędzie pomaga ocenić ryzyko, ale nie daje gwarancji, że wiadomość jest bezpieczna lub
-        niebezpieczna. Zawsze weryfikuj ważne sprawy oficjalnym kanałem.
+          {result && styles && (
+            <section className={`mt-5 rounded-xl border p-5 ${styles.card}`}>
+              <div className="flex flex-wrap items-center gap-4">
+                <ScoreRing score={result.riskScore} level={result.riskLevel} />
+                <div className="min-w-0 flex-1">
+                  <span
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold ${styles.badge}`}
+                  >
+                    {styles.icon} {styles.word}
+                  </span>
+                  <p className="mt-2 text-xs text-slate-500">Pewność oceny: {result.confidence}</p>
+                </div>
+              </div>
+
+              <p className="mt-4 text-sm leading-relaxed text-slate-800">{result.summary}</p>
+
+              {result.detectedSignals.length > 0 && (
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {result.detectedSignals.map((s) => (
+                    <li
+                      key={s.id}
+                      className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700"
+                    >
+                      {s.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="mt-4 rounded-lg bg-white/80 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Co zrobić
+                </p>
+                <ul className="mt-1.5 list-disc space-y-1 pl-4 text-sm text-slate-700">
+                  {result.recommendedAction.map((a, i) => (
+                    <li key={i}>{a}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {result.detectedSignals.length > 0 && (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowTechnical((v) => !v)}
+                    className="text-xs font-medium text-slate-500 underline decoration-dotted hover:text-slate-700"
+                  >
+                    {showTechnical ? "Ukryj szczegóły techniczne" : "Pokaż szczegóły techniczne"}
+                  </button>
+
+                  {showTechnical && (
+                    <div className="mt-2 space-y-2 rounded-lg border border-slate-200 bg-white/80 p-3">
+                      {result.detectedSignals.map((s) => (
+                        <div key={s.id} className="text-xs text-slate-600">
+                          <span className="font-mono text-slate-400">
+                            [{s.category}/{s.severity}]
+                          </span>{" "}
+                          <span className="font-medium text-slate-700">{s.label}</span>
+                          <p className="mt-0.5">{s.explanation}</p>
+                          {s.evidence && (
+                            <p className="mt-0.5 italic text-slate-500">„{s.evidence}"</p>
+                          )}
+                        </div>
+                      ))}
+                      <p className="pt-1 text-[11px] text-slate-400">
+                        Źródło wyjaśnienia:{" "}
+                        {result.explanationSource === "ai" ? "AI (Claude)" : "silnik regułowy"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+          )}
+        </section>
+
+        {/* How it works */}
+        <section className="mt-20">
+          <h2 className="text-center text-2xl font-bold text-slate-900">Jak to działa</h2>
+          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+            {HOW_IT_WORKS.map((step) => (
+              <div key={step.step} className="rounded-xl border border-slate-200 bg-white p-5">
+                <span className="text-sm font-bold text-indigo-500">{step.step}</span>
+                <h3 className="mt-2 font-semibold text-slate-900">{step.title}</h3>
+                <p className="mt-1.5 text-sm text-slate-600">{step.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Honest project facts (not fake usage stats) */}
+        <section className="mt-16 grid gap-4 sm:grid-cols-3">
+          {PROJECT_FACTS.map((fact) => (
+            <div
+              key={fact.label}
+              className="rounded-xl border border-slate-200 bg-white p-5 text-center"
+            >
+              <p className="text-2xl font-bold text-slate-900">{fact.value}</p>
+              <p className="mt-1 text-xs text-slate-500">{fact.label}</p>
+            </div>
+          ))}
+        </section>
+
+        {/* FAQ */}
+        <section className="mt-20">
+          <h2 className="text-center text-2xl font-bold text-slate-900">Częste pytania</h2>
+          <div className="mx-auto mt-8 max-w-2xl">
+            <Faq />
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="mx-auto max-w-4xl px-4 py-6 text-xs text-slate-400">
+          To narzędzie pomaga ocenić ryzyko, ale nie daje gwarancji, że wiadomość jest bezpieczna
+          lub niebezpieczna. Zawsze weryfikuj ważne sprawy oficjalnym kanałem — bezpośrednio w
+          aplikacji banku, kuriera lub platformy.
+        </div>
       </footer>
-    </main>
+    </div>
   );
 }
