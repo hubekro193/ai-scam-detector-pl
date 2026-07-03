@@ -2,7 +2,7 @@
 
 Silnik do oceny ryzyka oszustwa/phishingu w polskojęzycznych wiadomościach (SMS, e-mail, OLX, Allegro, WhatsApp, kurier/bank).
 
-**Status: Moduł 5 (rule-based scoring), Moduł 6 (AI-assisted explanation) i Moduł 7 (frontend Next.js) ukończone.** Ewaluacja trwa na bieżąco (Moduł 10) — silnik jest testowany na realnych wiadomościach, nie tylko na wymyślonych przykładach.
+**Status: Moduły 5-7 (silnik regułowy, AI-assisted explanation, frontend Next.js) i Moduł 11 (prywatność/bezpieczeństwo) ukończone.** Ewaluacja trwa na bieżąco (Moduł 10) — silnik jest testowany na realnych wiadomościach, nie tylko na wymyślonych przykładach.
 
 ## Architektura — dlaczego rules + AI, nie tylko AI
 
@@ -69,3 +69,21 @@ npm test                     # testy jednostkowe (vitest), zawsze offline
 ## Zasada projektowa
 
 To narzędzie ocenia ryzyko — nie daje gwarancji. Zawsze zachęcaj użytkownika do weryfikacji ważnych spraw oficjalnym kanałem.
+
+## Prywatność i bezpieczeństwo (Moduł 11)
+
+Co jest zrobione:
+
+- **Treść wiadomości nigdy nie jest zapisywana** — ani w bazie danych (bo jej nie ma), ani w logach serwera. `app/api/check/route.ts` celowo nie zawiera żadnego `console.log` z treścią wiadomości ani wynikiem.
+- **Warstwa AI nie widzi pełnej wiadomości** — dostaje tylko wykryte sygnały (kategoria, etykieta, krótki fragment-dowód), patrz `src/lib/scam-detector/ai/explain.ts`.
+- **Rate limiting** na `/api/check` — 10 żądań/minutę per adres IP (`src/lib/rateLimit.ts`), licznik uwzględnia też żądania z błędną walidacją, żeby nie dało się go obejść.
+- **Limit rozmiaru żądania** — nagłówek `Content-Length` jest sprawdzany przed odczytaniem body, żeby nie dało się zapchać serwera ogromnym payloadem.
+- **Nagłówki bezpieczeństwa** (`next.config.mjs`): `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`.
+- **Klucz API nigdy nie trafia do przeglądarki** — cała logika AI działa wyłącznie w route handlerze po stronie serwera.
+- React domyślnie escapuje wszystkie wyświetlane teksty (brak `dangerouslySetInnerHTML` w całym froncie) — brak wektora XSS przez wklejoną wiadomość.
+
+Uczciwe ograniczenia (świadomie nienaprawione na tym etapie MVP):
+
+- Rate limiter jest **w pamięci procesu** — działa dobrze na jednej instancji, ale resetuje się przy restarcie i nie jest współdzielony między wieloma instancjami (np. przy skalowaniu na Vercel/serverless). Do prawdziwej produkcji: współdzielony store (Redis/Upstash).
+- Adres IP do rate limitingu pochodzi z nagłówka `x-forwarded-for`, który można podrobić bez zaufanego reverse proxy przed aplikacją — wystarczające żeby zniechęcić przypadkowe nadużycia, nie jest twardą barierą bezpieczeństwa.
+- Brak Content Security Policy (CSP) — wymagałoby to konfiguracji nonce dla Next.js hydration scripts; odłożone, żeby nie zepsuć działania appki bez możliwości pełnego przetestowania w tej iteracji.
