@@ -3,3 +3,9 @@
 body {
   background-color: #f8fafc;
 }
+
+/* Subtle dot-grid, inspired by the soft background texture on scamdetector.pl's hero. */
+.dot-grid-bg {
+  background-image: radial-gradient(circle, #c7d2fe 1px, transparent 1px);
+  background-size: 24px 24px;
+}

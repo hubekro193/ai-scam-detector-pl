@@ -100,34 +100,53 @@ export default function HomePage() {
   const styles = result ? RISK_STYLES[result.riskLevel] : null;
 
   return (
-    <div className="bg-gradient-to-b from-indigo-50 via-white to-white">
-      {/* Header */}
-      <header className="mx-auto flex max-w-4xl items-center justify-between px-4 py-6">
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
-            ✓
-          </span>
-          <span className="font-semibold text-slate-900">AI Scam Detector PL</span>
-        </div>
-        <span className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
-          Wersja beta
-        </span>
-      </header>
+    <div className="bg-white">
+      {/* Dark canvas: header + hero share one seamless block, echoing an editorial agency feel */}
+      <div className="relative overflow-hidden bg-slate-950">
+        {/* Glow blobs standing in for a photographic hero image */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-32 right-0 h-96 w-96 rounded-full bg-indigo-600/30 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-violet-600/20 blur-3xl"
+        />
 
-      <main className="mx-auto max-w-4xl px-4 pb-20">
-        {/* Hero */}
-        <section className="pt-8 text-center sm:pt-14">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-            Zanim klikniesz — <span className="text-indigo-600">sprawdź, czy to nie scam.</span>
+        <header className="relative mx-auto flex max-w-4xl items-center justify-between px-4 py-6">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500 text-sm font-bold text-white">
+              ✓
+            </span>
+            <span className="font-semibold text-white">AI Scam Detector PL</span>
+          </div>
+          <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-slate-200">
+            Wersja beta
+          </span>
+        </header>
+
+        <section className="relative mx-auto max-w-4xl px-4 pb-24 pt-6 text-center sm:pt-10">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-slate-200">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+            Analiza działa lokalnie — treść nie jest zapisywana
+          </span>
+
+          <h1 className="mx-auto mt-6 max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
+            Zanim klikniesz — <span className="text-indigo-400">sprawdź, czy to nie scam.</span>
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-base text-slate-600 sm:text-lg">
+          <p className="mx-auto mt-4 max-w-xl text-base text-slate-400 sm:text-lg">
             Wklej treść SMS-a, e-maila lub wiadomości z OLX/Allegro. Analiza zajmuje kilka sekund —
             bez rejestracji i bez zapisywania danych.
           </p>
         </section>
+      </div>
 
-        {/* Check form card */}
-        <section className="mx-auto mt-8 max-w-2xl rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-slate-200/50 sm:p-7">
+      <main className="mx-auto max-w-4xl px-4 pb-20">
+        {/* Check form: floats up out of the dark hero onto the white canvas */}
+        <section className="relative z-10 mx-auto -mt-16 max-w-2xl rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10 sm:p-7">
           <form onSubmit={handleSubmit} className="space-y-3">
             <textarea
               value={message}
@@ -248,15 +267,24 @@ export default function HomePage() {
           )}
         </section>
 
-        {/* How it works */}
-        <section className="mt-20">
-          <h2 className="text-center text-2xl font-bold text-slate-900">Jak to działa</h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+        {/* How it works: editorial stepped list, oversized ghost numbers */}
+        <section className="mt-24">
+          <span className="text-xs font-semibold uppercase tracking-widest text-indigo-600">
+            Proces
+          </span>
+          <h2 className="mt-2 text-2xl font-bold text-slate-900">Jak to działa</h2>
+
+          <div className="mt-6 divide-y divide-slate-200 border-t border-slate-200">
             {HOW_IT_WORKS.map((step) => (
-              <div key={step.step} className="rounded-xl border border-slate-200 bg-white p-5">
-                <span className="text-sm font-bold text-indigo-500">{step.step}</span>
-                <h3 className="mt-2 font-semibold text-slate-900">{step.title}</h3>
-                <p className="mt-1.5 text-sm text-slate-600">{step.text}</p>
+              <div
+                key={step.step}
+                className="grid grid-cols-[auto_1fr] items-baseline gap-x-6 gap-y-1 py-6 sm:grid-cols-[100px_1fr]"
+              >
+                <span className="text-4xl font-bold text-slate-200 sm:text-5xl">{step.step}</span>
+                <div>
+                  <h3 className="font-semibold text-slate-900">{step.title}</h3>
+                  <p className="mt-1 text-sm text-slate-600">{step.text}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -276,16 +304,24 @@ export default function HomePage() {
         </section>
 
         {/* FAQ */}
-        <section className="mt-20">
-          <h2 className="text-center text-2xl font-bold text-slate-900">Częste pytania</h2>
-          <div className="mx-auto mt-8 max-w-2xl">
+        <section className="relative mt-24 pt-14 sm:pt-20">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 select-none whitespace-nowrap text-6xl font-bold text-slate-100 sm:text-8xl"
+          >
+            FAQ
+          </span>
+          <div className="relative text-center">
+            <h2 className="text-2xl font-bold text-slate-900">Częste pytania</h2>
+          </div>
+          <div className="relative mx-auto mt-8 max-w-2xl">
             <Faq />
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-4xl px-4 py-6 text-xs text-slate-400">
+      <footer className="bg-slate-950">
+        <div className="mx-auto max-w-4xl px-4 py-8 text-xs text-slate-400">
           To narzędzie pomaga ocenić ryzyko, ale nie daje gwarancji, że wiadomość jest bezpieczna
           lub niebezpieczna. Zawsze weryfikuj ważne sprawy oficjalnym kanałem — bezpośrednio w
           aplikacji banku, kuriera lub platformy.
