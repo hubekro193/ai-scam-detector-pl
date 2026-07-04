@@ -19,7 +19,7 @@ const PATTERNS: Pattern[] = [
   },
   {
     id: "payment.outside-platform",
-    regex: /(przelew bezposrednio|zaplac poza (allegro|olx|platforma)|platnosc poza serwisem|przelej na numer konta)/,
+    regex: /(przelew\w* bezposrednio|bezposrednio przelew\w*|zaplac\w* poza (allegro|olx|platform\w*)|platnosc\w* poza serwisem|przelej\w*.{0,20}numer konta|pomijaj\w*.{0,15}platnosc\w*)/,
     severity: "critical",
     label: "Płatność poza oficjalną platformą",
     explanation:
@@ -48,6 +48,14 @@ const PATTERNS: Pattern[] = [
     label: "Rzekoma opłata celna",
     explanation:
       "Wiadomość żąda drobnej \"opłaty celnej\" za przesyłkę — częsty wariant scamu kurierskiego, szczególnie przy rzekomych paczkach z zagranicy. Prawdziwe cło nie jest pobierane w ten sposób.",
+  },
+  {
+    id: "payment.verification-fee",
+    regex: /(oplat\w* weryfikacyjn\w*|oplat\w* rejestracyjn\w*|kaucj\w* zwrotn\w*|oplat\w* szkoleniow\w*)/,
+    severity: "high",
+    label: "Opłata \"weryfikacyjna\" pobierana z góry",
+    explanation:
+      "Wiadomość żąda opłaty \"weryfikacyjnej\", \"rejestracyjnej\" lub kaucji przed rozpoczęciem współpracy — klasyczny wzorzec fałszywych ofert pracy i \"okazji\", w których nigdy nie odzyskasz wpłaconych pieniędzy.",
   },
 ];
 

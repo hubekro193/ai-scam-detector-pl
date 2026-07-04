@@ -2,7 +2,7 @@
 
 Silnik do oceny ryzyka oszustwa/phishingu w polskojęzycznych wiadomościach (SMS, e-mail, OLX, Allegro, WhatsApp, kurier/bank).
 
-**Status: Moduły 5-8 (silnik regułowy, AI-assisted explanation, frontend Next.js, structured output + walidacja Zod) i Moduł 11 (prywatność/bezpieczeństwo) ukończone.** Ewaluacja trwa na bieżąco (Moduł 10) — silnik jest testowany na realnych wiadomościach, nie tylko na wymyślonych przykładach.
+**Status: Moduły 5-9 (silnik regułowy, AI-assisted explanation, frontend Next.js, structured output + walidacja Zod, dataset testowy) i Moduł 11 (prywatność/bezpieczeństwo) ukończone.** Ewaluacja trwa na bieżąco (Moduł 10) — silnik jest testowany na realnych wiadomościach, nie tylko na wymyślonych przykładach. Zostaje Moduł 12 (polish portfolio).
 
 ## Architektura — dlaczego rules + AI, nie tylko AI
 

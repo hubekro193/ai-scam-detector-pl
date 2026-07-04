@@ -182,6 +182,25 @@ export default function HomePage() {
                   {ex.label}
                 </button>
               ))}
+
+              <select
+                aria-label="Więcej przykładów testowych"
+                value=""
+                onChange={(e) => {
+                  const chosen = TEST_MESSAGES.find((m) => m.id === e.target.value);
+                  if (chosen) setMessage(chosen.message);
+                }}
+                className="rounded-full border border-dashed border-slate-300 bg-white px-3 py-1 text-xs text-slate-500 transition hover:border-indigo-300 hover:text-indigo-700 focus:outline-none"
+              >
+                <option value="" disabled>
+                  Więcej przykładów ({TEST_MESSAGES.length})...
+                </option>
+                {TEST_MESSAGES.map((ex) => (
+                  <option key={ex.id} value={ex.id}>
+                    [{ex.expectedLevel}] {ex.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </form>
 

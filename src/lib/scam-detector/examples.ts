@@ -113,4 +113,51 @@ export const TEST_MESSAGES: TestMessage[] = [
     message:
       "Dzien dobry, na jutro (04.10.2024) okolo godziny 11:00-13:00 planowana jest dostawa przesylki z wniesieniem. Prosimy o potwierdzenie smsem zwrotnym czy pod adresem kurierzy zastana kogos w tym terminie. Pozdrawiamy, AmbroExpress",
   },
+  {
+    // Fills a gap: government/authority impersonation (Identity Risk category)
+    // was not exercised by any prior example.
+    id: "tax-office-impersonation",
+    label: "Urząd Skarbowy: fałszywa zaległość podatkowa",
+    expectedLevel: "Critical",
+    message:
+      "URZĄD SKARBOWY: Stwierdzono zaległość podatkową w wysokości 230 zł. Uregyluj płatność w ciągu 48 godzin, aby uniknąć postępowania egzekucyjnego: http://e-us-platnosc.example.pl/zaplac",
+  },
+  {
+    // Fills a gap: fake job offer requiring an upfront "verification fee" and
+    // an ID scan — explicitly called out in the project brief, previously untested.
+    id: "fake-job-offer-id-scan",
+    label: "Fałszywa oferta pracy: opłata weryfikacyjna + skan dowodu",
+    expectedLevel: "High",
+    message:
+      "Gratulacje! Zostales zakwalifikowany do pracy zdalnej z wynagrodzeniem 6000 zl miesiecznie. Aby potwierdzic zatrudnienie, przeslij skan dowodu osobistego oraz oplac oplate weryfikacyjna w wysokosci 50 zl na konto szkoleniowe.",
+  },
+  {
+    // Fills a gap: URL shorteners (link.shortener) and pressure.last-chance /
+    // language.excessive-punctuation had zero prior test coverage.
+    id: "shortened-link-prize-scam",
+    label: "Rzekoma wygrana z linkiem skróconym (bit.ly)",
+    expectedLevel: "High",
+    message:
+      "Gratulacje! Wygrales bezplatna karte podarunkowa o wartosci 500 zl. To Twoja ostatnia szansa, oferta wazna tylko dzisiaj. Odbierz tutaj: https://bit.ly/xK9dQ2 Nie przegap!!!",
+  },
+  {
+    // Fills a gap: payment.outside-platform had zero prior test coverage.
+    id: "olx-outside-platform-payment",
+    label: "OLX: namowa do zapłaty poza platformą",
+    expectedLevel: "High",
+    message:
+      "Dzien dobry, jest Pan zainteresowany moja oferta? Wolalabym, zeby zaplacil Pan bezposrednio przelewem, pomijajac platnosc OLX — tak bedzie szybciej dla nas obu.",
+  },
+  {
+    // Deliberately mild/ambiguous: a vague account warning with NO link and NO
+    // data/payment request — models a message that's a bit off but doesn't
+    // clearly cross into scam territory. Good calibration check: this should
+    // land noticeably lower than the other examples, not get lumped in as
+    // equally dangerous.
+    id: "vague-account-warning-no-link",
+    label: "Niesprecyzowane ostrzeżenie o koncie (bez linku i bez prośby o dane)",
+    expectedLevel: "Low",
+    message:
+      "Wykryto podejrzana aktywnosc na Twoim koncie. Sprawdz szczegoly logujac sie samodzielnie do swojej bankowosci internetowej.",
+  },
 ];

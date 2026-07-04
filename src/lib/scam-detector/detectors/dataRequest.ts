@@ -53,7 +53,7 @@ const PATTERNS: Pattern[] = [
   },
   {
     id: "data.id-scan",
-    regex: /(skan dowodu|zdjecie dowodu osobistego|przeslij dowod)/,
+    regex: /(skan\w* dowodu|zdjeci\w* dowodu osobist\w*|przesli\w* dowod\w*)/,
     severity: "high",
     label: "Prośba o skan dowodu osobistego",
     explanation:
