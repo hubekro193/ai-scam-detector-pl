@@ -2,42 +2,14 @@
 
 import { useState } from "react";
 import { TEST_MESSAGES } from "@/lib/scam-detector/examples";
-import type { DetectionResult, RiskLevel } from "@/lib/scam-detector/types";
+import type { DetectionResult } from "@/lib/scam-detector/types";
 import { ScoreRing } from "./components/ScoreRing";
 import { Faq } from "./components/Faq";
+import { ExamplePicker } from "./components/ExamplePicker";
+import { RISK_STYLES } from "./components/riskStyles";
 
 const EXAMPLE_IDS = ["courier-topup-scam", "blik-friend-scam", "legit-parcel-notification"];
 const EXAMPLES = TEST_MESSAGES.filter((m) => EXAMPLE_IDS.includes(m.id));
-
-const RISK_STYLES: Record<
-  RiskLevel,
-  { badge: string; card: string; icon: string; word: string }
-> = {
-  Low: {
-    badge: "bg-emerald-100 text-emerald-800 border-emerald-300",
-    card: "border-emerald-200 bg-emerald-50/60",
-    icon: "🟢",
-    word: "Niskie ryzyko",
-  },
-  Medium: {
-    badge: "bg-amber-100 text-amber-800 border-amber-300",
-    card: "border-amber-200 bg-amber-50/60",
-    icon: "🟡",
-    word: "Umiarkowane ryzyko",
-  },
-  High: {
-    badge: "bg-orange-100 text-orange-800 border-orange-300",
-    card: "border-orange-200 bg-orange-50/60",
-    icon: "🟠",
-    word: "Wysokie ryzyko",
-  },
-  Critical: {
-    badge: "bg-red-100 text-red-800 border-red-300",
-    card: "border-red-200 bg-red-50/60",
-    icon: "🔴",
-    word: "Bardzo wysokie ryzyko",
-  },
-};
 
 const HOW_IT_WORKS = [
   {
@@ -183,24 +155,7 @@ export default function HomePage() {
                 </button>
               ))}
 
-              <select
-                aria-label="Więcej przykładów testowych"
-                value=""
-                onChange={(e) => {
-                  const chosen = TEST_MESSAGES.find((m) => m.id === e.target.value);
-                  if (chosen) setMessage(chosen.message);
-                }}
-                className="rounded-full border border-dashed border-slate-300 bg-white px-3 py-1 text-xs text-slate-500 transition hover:border-indigo-300 hover:text-indigo-700 focus:outline-none"
-              >
-                <option value="" disabled>
-                  Więcej przykładów ({TEST_MESSAGES.length})...
-                </option>
-                {TEST_MESSAGES.map((ex) => (
-                  <option key={ex.id} value={ex.id}>
-                    [{ex.expectedLevel}] {ex.label}
-                  </option>
-                ))}
-              </select>
+              <ExamplePicker onSelect={setMessage} />
             </div>
           </form>
 
