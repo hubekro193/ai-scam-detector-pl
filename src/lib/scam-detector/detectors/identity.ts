@@ -42,6 +42,14 @@ const PATTERNS: Pattern[] = [
       "Wiadomość powołuje się na pracodawcę lub dział kadr — warto zweryfikować nadawcę innym, znanym kanałem kontaktu.",
   },
   {
+    id: "identity.emotional-money-request",
+    regex: /(utkn\w+.{0,40}(pieni\w+|kas\w+)|potrzebuj\w+ pilnie pieni\w+|pozycz\w* mi.{0,20}(pieni\w+|zl)|prosz\w* o pomoc finansow\w+)/,
+    severity: "high",
+    label: "Emocjonalna prośba o pilny przelew pieniędzy",
+    explanation:
+      "Wiadomość buduje presję emocjonalną (np. \"utknąłem, brakuje mi pieniędzy\"), by skłonić Cię do szybkiego przelewu bez zastanowienia — częsty wzorzec w oszustwach \"na bliską osobę\" i romance scamach.",
+  },
+  {
     id: "identity.sender-prefix",
     regex: /^(inpost|dpd|dhl|allegro|olx|poczta polska|blik)(\s+\w+){0,2}\s*[:\-]/,
     severity: "low",

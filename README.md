@@ -30,6 +30,7 @@ src/lib/scam-detector/
   index.ts             — analyzeMessage(text) [sync, offline] i explainMessage(text) [async, + AI]
   examples.ts          — bezpieczne, fikcyjne przykłady testowe (w tym sanitizowane regresje z realnych scamów)
   demo.ts              — skrypt uruchamiający silnik na przykładach
+  evaluate.ts          — precision/recall/F1 na etykietowanym zbiorze (Moduł 10)
   __tests__/           — testy vitest (offline, bez potrzeby klucza API)
 src/cli/
   check.ts             — interaktywne CLI: wklej dowolną wiadomość, dostań pełną ocenę
@@ -63,6 +64,7 @@ npm install
 npm run dev                # uruchamia aplikację webową na http://localhost:3000
 npm run build               # build produkcyjny (Next.js)
 npm run demo                 # uruchamia silnik na przykładowych wiadomościach (CLI)
+npm run evaluate              # precision/recall/F1 na etykietowanym zbiorze (Moduł 10)
 npm run check -- "treść"     # sprawdź własną wiadomość (interaktywne CLI, bez UI)
 npm test                     # testy jednostkowe (vitest), zawsze offline
 ```
@@ -97,7 +99,17 @@ Najszybszy sposób, żeby zobaczyć projekt w akcji:
 npm run dev
 ```
 
-i otwórz `http://localhost:3000` — wklej dowolną wiadomość albo wybierz jeden z 17 przykładów z listy rozwijanej. Alternatywnie `npm run demo` pokaże wynik dla wszystkich przykładów naraz w terminalu, bez uruchamiania serwera.
+i otwórz `http://localhost:3000` — wklej dowolną wiadomość albo wybierz jeden z 38 przykładów z listy rozwijanej. Alternatywnie `npm run demo` pokaże wynik dla wszystkich przykładów naraz w terminalu, bez uruchamiania serwera.
+
+## Ewaluacja (Moduł 10) — precision/recall na etykietowanym zbiorze
+
+```
+npm run evaluate
+```
+
+Na obecnym zbiorze 38 przykładów (21 scam / 17 legalnych wiadomości): **100% precision, 100% recall**.
+
+**Ważne zastrzeżenie, żeby nie przereklamować tego wyniku:** każdy z tych 38 przykładów był użyty do zaprojektowania albo debugowania reguł — łącznie z przypadkami, które same znalazłem i naprawiłem w trakcie budowy (np. fałszywy alarm na "UWAGA" w ostrzeżeniach antyphishingowych, czy brak wykrywania scamów inwestycyjnych bez konkretnej prośby o dane). 100% na tym zbiorze mówi "nie zepsuliśmy niczego, co już znamy" — nie mówi "silnik złapie każdy nowy, nieznany wzorzec oszustwa". Rzetelna ocena generalizacji wymagałaby zbioru odizolowanego od procesu projektowania reguł (held-out test set), którego celowo nie mamy w tym MVP.
 
 ## Ograniczenia (uczciwie, nie na wyrost)
 
@@ -105,7 +117,7 @@ i otwórz `http://localhost:3000` — wklej dowolną wiadomość albo wybierz je
 - **Nie wykrywa faktycznego malware/exploitów przeglądarkowych** — tylko wzorce tekstowe i linki phishingowe. Link, który wykrada dane przez lukę w przeglądarce (a nie przez fałszywy formularz), jest poza zakresem tego narzędzia.
 - **Brak integracji z realnymi bazami zagrożeń** (Google Safe Browsing, CERT Polska) — w przeciwieństwie do niektórych komercyjnych narzędzi, sprawdzamy tylko małą, ręcznie utrzymywaną listę znanych marek i podejrzanych końcówek domen.
 - **Brak historii/trwałości** — każde sprawdzenie jest bezstanowe (świadomie, ze względu na prywatność), więc nie da się pokazać "tę wiadomość zgłoszono już 40 razy" ani budować statystyk trendów.
-- **Wagi scoringu są ręcznie dobrane, nie zwalidowane statystycznie.** 17 przykładów testowych dobrze ilustruje różne wzorce, ale to za mało, żeby policzyć sensowny precision/recall. Kalibracja (np. próg Critical vs High) opiera się na mojej ocenie, nie na dużym oznaczonym zbiorze danych.
+- **Wagi scoringu są ręcznie dobrane, nie zwalidowane statystycznie na dużym, niezależnym zbiorze.** Mamy teraz 38 przykładów i policzone precision/recall (patrz sekcja "Ewaluacja" wyżej), ale to wciąż zbiór, który sam projektowałem — 100% na nim nie oznacza 100% w prawdziwym świecie. Kalibracja progów (np. Critical vs High) opiera się na mojej ocenie, nie na held-out teście.
 - **Reguły detekcji są jawne i publiczne** (ten sam kod jest na GitHubie) — zdeterminowany oszust może przeczytać regexy i celowo ich unikać. To klasyczny kompromis open-source vs. security-through-obscurity.
 - **Rate limiter działa tylko w pamięci procesu** (patrz sekcja Prywatność i bezpieczeństwo) — nie skaluje się do wielu instancji bez dodatkowej pracy.
 - **Jakość wyjaśnień AI zależy od dostępności Claude API** — bez klucza lub przy awarii appka nadal działa, ale wyjaśnienia są bardziej surowe (prosto z silnika regułowego).

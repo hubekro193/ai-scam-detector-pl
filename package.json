@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "demo": "tsx src/lib/scam-detector/demo.ts",
+    "evaluate": "tsx src/lib/scam-detector/evaluate.ts",
     "check": "tsx src/cli/check.ts"
   },
   "devDependencies": {

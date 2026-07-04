@@ -57,6 +57,17 @@ const PATTERNS: Pattern[] = [
     explanation:
       "Wiadomość żąda opłaty \"weryfikacyjnej\", \"rejestracyjnej\" lub kaucji przed rozpoczęciem współpracy — klasyczny wzorzec fałszywych ofert pracy i \"okazji\", w których nigdy nie odzyskasz wpłaconych pieniędzy.",
   },
+  {
+    // Fake investment/crypto scams: found via Module 10 statistical
+    // evaluation — a message promising a fixed guaranteed return with no
+    // data/payment-specific ask wasn't triggering ANY payment signal before.
+    id: "payment.guaranteed-return",
+    regex: /(zainwestuj\w*.{0,40}(otrzymasz|dostaniesz|zarobisz)|gwarantowany zysk|pomnoz\w*.{0,15}pieniadze|zwrot\w*.{0,15}\d{2,4}\s*%|zarobisz\w*.{0,15}\d{2,4}\s*%)/,
+    severity: "high",
+    label: "Obietnica gwarantowanego zysku z inwestycji",
+    explanation:
+      "Wiadomość obiecuje gwarantowany, szybki zwrot z inwestycji (np. \"zainwestuj X, otrzymasz Y\") — żadna legalna inwestycja nie gwarantuje zysku, to klasyczny wzorzec oszustw inwestycyjnych/kryptowalutowych.",
+  },
 ];
 
 export const detectPaymentRisk: Detector = (_text, normalized) => {

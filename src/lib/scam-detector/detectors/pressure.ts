@@ -43,7 +43,11 @@ const PATTERNS: Pattern[] = [
   },
   {
     id: "pressure.confirm-now",
-    regex: /(potwierdz teraz|dzialaj natychmiast|natychmiastowej reakcji|wymagane natychmiast|pilne|uwaga)/,
+    // NOTE: bare "uwaga" was here before and caused a real false positive —
+    // it's an extremely common, neutral word ("attention/note") used in
+    // tons of legitimate messages (including anti-fraud warnings!). Removed
+    // in favor of more specific urgency phrasing.
+    regex: /(potwierdz teraz|dzialaj natychmiast|natychmiastowej reakcji|wymagane natychmiast|\bpilne\b)/,
     severity: "medium",
     label: "Wezwanie do natychmiastowego działania",
     explanation:
