@@ -1,5 +1,7 @@
 # AI Scam Detector PL
 
+**🔗 Żywe demo: [ai-scam-detector-pl.vercel.app](https://ai-scam-detector-pl.vercel.app)**
+
 Silnik do oceny ryzyka oszustwa/phishingu w polskojęzycznych wiadomościach (SMS, e-mail, OLX, Allegro, WhatsApp, kurier/bank).
 
 **Status: MVP kompletne (Moduły 5-9, 11, 12).** Ewaluacja (Moduł 10) trwa na bieżąco przy każdym nowym teście na realnej wiadomości — to nie jednorazowy etap, tylko ciągły proces.
@@ -93,7 +95,9 @@ Uczciwe ograniczenia (świadomie nienaprawione na tym etapie MVP):
 
 ## Demo
 
-Najszybszy sposób, żeby zobaczyć projekt w akcji:
+Najszybciej: **[ai-scam-detector-pl.vercel.app](https://ai-scam-detector-pl.vercel.app)** — działająca wersja produkcyjna, nic nie trzeba instalować.
+
+Żeby uruchomić lokalnie:
 
 ```
 npm run dev
