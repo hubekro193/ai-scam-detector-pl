@@ -101,6 +101,20 @@ npm run dev
 
 i otwórz `http://localhost:3000` — wklej dowolną wiadomość albo wybierz jeden z 38 przykładów z listy rozwijanej. Alternatywnie `npm run demo` pokaże wynik dla wszystkich przykładów naraz w terminalu, bez uruchamiania serwera.
 
+### Wdrożenie na Vercel (żywy link)
+
+Projekt jest gotowy do wdrożenia bez dodatkowej konfiguracji — `next build` przechodzi czysto, a jedyna sekretna wartość (`ANTHROPIC_API_KEY`) jest już wyodrębniona do zmiennej środowiskowej, nigdy nie trafia do kodu.
+
+1. Wejdź na [vercel.com](https://vercel.com) i zaloguj się swoim kontem GitHub.
+2. Kliknij **Add New → Project** i wybierz to repozytorium (`ai-scam-detector-pl`).
+3. Vercel automatycznie wykryje Next.js — nie trzeba zmieniać żadnych ustawień builda.
+4. W sekcji **Environment Variables** dodaj `ANTHROPIC_API_KEY` ze swoim kluczem (opcjonalne — bez niego appka i tak działa, tylko na silniku regułowym zamiast Claude).
+5. Kliknij **Deploy**. Po ~1 minucie dostaniesz publiczny link (`https://twoj-projekt.vercel.app`).
+
+Każdy kolejny `git push` do gałęzi `main` automatycznie wdroży nową wersję (Vercel robi to domyślnie dla repozytoriów podłączonych przez GitHub).
+
+**Uwaga dot. rate limitera na Vercel:** licznik w pamięci procesu (`src/lib/rateLimit.ts`) działa per-instancja serverless — na darmowym planie Vercel to wystarczające dla dema portfolio, ale nie jest to twarda gwarancja limitu przy większym ruchu (patrz sekcja "Ograniczenia").
+
 ## Ewaluacja (Moduł 10) — precision/recall na etykietowanym zbiorze
 
 ```
