@@ -1,5 +1,8 @@
 # AI Scam Detector PL
 
+[![CI](https://github.com/hubekro193/ai-scam-detector-pl/actions/workflows/ci.yml/badge.svg)](https://github.com/hubekro193/ai-scam-detector-pl/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
 **🔗 Żywe demo: [ai-scam-detector-pl.vercel.app](https://ai-scam-detector-pl.vercel.app)**
 
 Silnik do oceny ryzyka oszustwa/phishingu w polskojęzycznych wiadomościach (SMS, e-mail, OLX, Allegro, WhatsApp, kurier/bank).
@@ -179,7 +182,7 @@ Na obecnym zbiorze 38 przykładów (21 scam / 17 legalnych wiadomości): **100% 
 
 **Jakie są ograniczenia?** Patrz sekcja wyżej — w skrócie: część regexów wciąż nie ma fuzzy fallbacku (tylko te, które już sprawiały problem), integracja z threat intel ograniczona świadomie do jednego źródła (CERT Polska, nie Google Safe Browsing — trade-off prywatności), brak statystycznej walidacji wag scoringu na dużym, niezależnym zbiorze, brak wykrywania faktycznego malware.
 
-**Jak byś to usprawnił z większą ilością czasu?** Patrz "Możliwe usprawnienia" wyżej — priorytet: rozszerzenie fuzzy matching na resztę silnika, CI/CD, i właściwa ewaluacja precision/recall na dużo większym, niezależnym zbiorze danych.
+**Jak byś to usprawnił z większą ilością czasu?** Patrz "Możliwe usprawnienia" wyżej — priorytet: rozszerzenie fuzzy matching na resztę silnika i właściwa ewaluacja precision/recall na dużo większym, niezależnym zbiorze danych.
 
 **Czego się nauczyłeś budując to?** Że moje własne testy jednostkowe dawały fałszywe poczucie bezpieczeństwa, dopóki nie przetestowałem silnika na prawdziwych, ręcznie napisanych po polsku wiadomościach — różnica między "działa na moich testach" a "działa naprawdę" okazała się dużo większa, niż się spodziewałem. Nauczyłem się też świadomie projektować architekturę tak, żeby AI nigdy nie było pojedynczym punktem awarii ani jedynym źródłem prawdy w systemie bezpieczeństwa.
 
