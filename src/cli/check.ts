@@ -8,6 +8,7 @@
  */
 import "dotenv/config";
 import { explainMessage } from "../lib/scam-detector/index";
+import { refreshThreatIntelIfStale } from "../lib/scam-detector/threatIntel";
 
 async function readStdin(): Promise<string> {
   const chunks: Buffer[] = [];
@@ -31,6 +32,7 @@ async function main() {
     process.exit(1);
   }
 
+  await refreshThreatIntelIfStale();
   const result = await explainMessage(message);
 
   console.log(`\n${LEVEL_ICON[result.riskLevel] ?? ""} Ryzyko: ${result.riskLevel} (score ${result.riskScore}/100, pewność: ${result.confidence})`);

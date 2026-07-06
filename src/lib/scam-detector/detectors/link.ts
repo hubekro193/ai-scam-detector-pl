@@ -1,5 +1,6 @@
 import type { Detector, Signal } from "../types";
 import { extractUrls } from "../utils";
+import { isDomainFlagged } from "../threatIntel";
 
 const SHORTENERS = [
   "bit.ly",
@@ -57,6 +58,24 @@ export const detectLinkRisk: Detector = (text, normalized) => {
 
   for (const url of urls) {
     const { hostname, raw } = url;
+
+    // 0. Confirmed hit against the CERT Polska Warning List — a curated,
+    // continuously updated feed of real phishing domains targeting Polish
+    // users. Checked against a locally cached copy (see threatIntel.ts) —
+    // this domain is never sent anywhere. Highest-confidence link signal
+    // in the engine, since it's a verified report rather than a heuristic.
+    if (isDomainFlagged(hostname)) {
+      signals.push({
+        id: "link.cert-polska-warning-list",
+        category: "link",
+        severity: "critical",
+        label: "Domena na liście ostrzeżeń CERT Polska",
+        explanation:
+          "Ta domena znajduje się na oficjalnej Liście Ostrzeżeń CERT Polska — potwierdzonym, na bieżąco aktualizowanym rejestrze stron wykorzystywanych do oszustw wobec polskich internautów.",
+        evidence: hostname,
+        authoritative: true,
+      });
+    }
 
     // 1. URL shorteners hide the real destination.
     if (SHORTENERS.some((s) => hostname === s || hostname.endsWith(`.${s}`))) {

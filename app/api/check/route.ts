@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { explainMessage } from "@/lib/scam-detector";
 import { checkRateLimit, getClientKey } from "@/lib/rateLimit";
 import { CheckRequestSchema, DetectionResultSchema } from "@/lib/scam-detector/schemas";
+import { refreshThreatIntelIfStale } from "@/lib/scam-detector/threatIntel";
 
 export const runtime = "nodejs";
 
@@ -45,6 +46,10 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
+
+  // 3b. Keep the CERT Polska Warning List cache warm (no-op if refreshed
+  // within the last 5 minutes; internally time-boxed to 3s, never throws).
+  await refreshThreatIntelIfStale();
 
   try {
     const result = await explainMessage(parsedRequest.data.message);

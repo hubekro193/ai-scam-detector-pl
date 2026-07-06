@@ -158,6 +158,12 @@ export function scoreSignals(signals: Signal[]): DetectionResult {
   if (criticalCount >= 2) riskLevel = maxLevel(riskLevel, "Critical");
   else if (criticalCount === 1) riskLevel = maxLevel(riskLevel, "High");
 
+  // Authoritative override: a confirmed hit against an external source like
+  // the CERT Polska Warning List isn't a heuristic guess — a real
+  // organization already verified this exact domain is malicious. That
+  // beats any score-based math, so it goes straight to Critical.
+  if (signals.some((s) => s.authoritative)) riskLevel = "Critical";
+
   const confidence = computeConfidence(signals, triggeredCategories);
   const summary = buildSummary(triggeredCategories, riskLevel);
   const recommendedAction = buildRecommendedActions(signals, triggeredCategories);

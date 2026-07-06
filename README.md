@@ -24,6 +24,7 @@ src/lib/scam-detector/
   types.ts            — typy: Signal, DetectionResult, RiskCategory, Severity...
   utils.ts             — normalizacja tekstu, ekstrakcja URL (w tym refang() dla zdefangowanych linków)
   fuzzy.ts             — dopasowanie rozmyte (Levenshtein) — tolerancja na odmianę słów i literówki
+  threatIntel.ts       — cache publicznej Listy Ostrzeżeń CERT Polska, sprawdzanie domen lokalnie
   detectors/           — 7 niezależnych detektorów (link, identity, pressure, data, payment, language, context)
   scoring.ts           — agregacja sygnałów w riskScore/riskLevel/confidence + rekomendowane działania
   schemas.ts           — schematy Zod: walidacja requestu API + kontraktowy test kształtu DetectionResult
@@ -120,6 +121,17 @@ Każdy kolejny `git push` do gałęzi `main` automatycznie wdroży nową wersję
 
 **Uwaga dot. rate limitera na Vercel:** licznik w pamięci procesu (`src/lib/rateLimit.ts`) działa per-instancja serverless — na darmowym planie Vercel to wystarczające dla dema portfolio, ale nie jest to twarda gwarancja limitu przy większym ruchu (patrz sekcja "Ograniczenia").
 
+## Threat intel — Lista Ostrzeżeń CERT Polska
+
+Silnik sprawdza każdy link w wiadomości przeciwko [oficjalnej Liście Ostrzeżeń CERT Polska](https://cert.pl/en/warning-list/) — publicznej, darmowej, na bieżąco aktualizowanej (co ~5 minut) liście ok. 3800+ potwierdzonych domen phishingowych atakujących polskich internautów. Bez klucza API, bez rejestracji.
+
+**Jak to działa, i dlaczego akurat tak:**
+
+- Pobieramy **całą listę** (plik tekstowy, ~65 KB) i trzymamy lokalną kopię w pamięci procesu, odświeżaną co 5 minut (`src/lib/scam-detector/threatIntel.ts`).
+- Sprawdzanie konkretnej domeny odbywa się **lokalnie**, przeciwko tej kopii — żaden URL z wiadomości użytkownika nigdy nie jest wysyłany do CERT Polska ani do kogokolwiek innego. To był świadomy wybór architektoniczny: alternatywa (Google Safe Browsing Lookup API) wymagałaby wysłania każdego sprawdzanego linku do serwerów Google.
+- Trafienie na liście to sygnał **potwierdzony przez realną instytucję**, nie heurystyka — dlatego automatycznie podbija ocenę do Critical, niezależnie od pozostałych sygnałów (`Signal.authoritative` w `scoring.ts`).
+- Jeśli pobranie listy się nie powiedzie (timeout, brak sieci) — silnik działa dalej normalnie, po prostu bez tego dodatkowego sygnału. Ten sam wzorzec "zewnętrzna zależność nigdy nie blokuje działania" co w warstwie AI i rate limiterze.
+
 ## Ewaluacja (Moduł 10) — precision/recall na etykietowanym zbiorze
 
 ```
@@ -134,7 +146,7 @@ Na obecnym zbiorze 38 przykładów (21 scam / 17 legalnych wiadomości): **100% 
 
 - **Wykrywanie regexowe jest częściowo kruche na odmianę słów — teraz częściowo naprawione systemowo.** W trakcie budowy kilkukrotnie znajdowałem sygnały, które nie działały na prawdziwych wiadomościach mimo że przechodziły moje testy — bo pisałem przykłady z góry "wyczyszczone", zamiast prawdziwej odmiany (`ł` się nie normalizuje przez Unicode NFD, "skanu" nie pasowało do wzorca "skan"). Zamiast łatać to pojedynczo za każdym razem, dodałem `src/lib/scam-detector/fuzzy.ts` — dopasowanie na odległości edycyjnej (Levenshteina), tolerancyjne na odmianę i literówki, z progiem skalowanym długością słowa (krótkie słowa jak "kod" celowo NIE są rozmywane, żeby nie kolidować z niepowiązanymi wyrazami). Zastosowane na razie tylko do wzorców, które już realnie sprawiały problem (`dataRequest.ts`, `payment.ts`, `context.ts`) — nie do wszystkich ~45 reguł w silniku. Zdeterminowany scamer testujący naprawdę nietypowe sformułowanie może wciąż ominąć regułę, która nie ma jeszcze fuzzy fallbacku.
 - **Nie wykrywa faktycznego malware/exploitów przeglądarkowych** — tylko wzorce tekstowe i linki phishingowe. Link, który wykrada dane przez lukę w przeglądarce (a nie przez fałszywy formularz), jest poza zakresem tego narzędzia.
-- **Brak integracji z realnymi bazami zagrożeń** (Google Safe Browsing, CERT Polska) — w przeciwieństwie do niektórych komercyjnych narzędzi, sprawdzamy tylko małą, ręcznie utrzymywaną listę znanych marek i podejrzanych końcówek domen.
+- **Integracja z jedną realną bazą zagrożeń (CERT Polska), świadomie nie z Google Safe Browsing.** Domeny sprawdzamy teraz też przeciwko oficjalnej Liście Ostrzeżeń CERT Polska (patrz sekcja "Threat intel" niżej) — ale to jedno źródło, nie kilka. Google Safe Browsing dawałby szerszą, globalną bazę, ale ich prosty Lookup API wymaga wysłania każdego sprawdzanego URL-a do serwerów Google, co kłóciłoby się z zasadą "nic nie wysyłamy nigdzie" tego projektu — świadomie tego nie zaimplementowałem z tego powodu, a nie z braku czasu.
 - **Brak historii/trwałości** — każde sprawdzenie jest bezstanowe (świadomie, ze względu na prywatność), więc nie da się pokazać "tę wiadomość zgłoszono już 40 razy" ani budować statystyk trendów.
 - **Wagi scoringu są ręcznie dobrane, nie zwalidowane statystycznie na dużym, niezależnym zbiorze.** Mamy teraz 38 przykładów i policzone precision/recall (patrz sekcja "Ewaluacja" wyżej), ale to wciąż zbiór, który sam projektowałem — 100% na nim nie oznacza 100% w prawdziwym świecie. Kalibracja progów (np. Critical vs High) opiera się na mojej ocenie, nie na held-out teście.
 - **Reguły detekcji są jawne i publiczne** (ten sam kod jest na GitHubie) — zdeterminowany oszust może przeczytać regexy i celowo ich unikać. To klasyczny kompromis open-source vs. security-through-obscurity.
@@ -143,7 +155,7 @@ Na obecnym zbiorze 38 przykładów (21 scam / 17 legalnych wiadomości): **100% 
 
 ## Możliwe usprawnienia (z większą ilością czasu)
 
-- Integracja z prawdziwymi źródłami reputacji domen (Google Safe Browsing API, feed CERT Polska) zamiast ręcznej listy marek.
+- ~~Integracja z prawdziwymi źródłami reputacji domen~~ — zrobione dla CERT Polska (patrz sekcja "Threat intel" wyżej). Google Safe Browsing pozostaje świadomie pominięte ze względu na wymóg wysyłania sprawdzanych URL-i do Google.
 - Opcjonalna, prywatna telemetria — tylko zagregowane statystyki (np. "wykryto link phishingowy" bez treści wiadomości), nigdy surowe dane.
 - Zgłaszanie przez użytkowników wiadomości, które silnik przeoczył — budowanie datasetu w czasie, zamiast polegać wyłącznie na moim ręcznym testowaniu.
 - Właściwa ewaluacja: większy, oznaczony zbiór danych (100+ przykładów) i policzony precision/recall, zamiast oceny "na oko".

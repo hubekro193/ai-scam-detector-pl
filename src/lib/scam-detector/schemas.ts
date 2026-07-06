@@ -37,6 +37,7 @@ export const SignalSchema = z.object({
   label: z.string().min(1),
   explanation: z.string().min(1),
   evidence: z.string().optional(),
+  authoritative: z.boolean().optional(),
 });
 
 export const DetectionResultSchema = z.object({

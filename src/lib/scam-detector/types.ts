@@ -33,6 +33,16 @@ export interface Signal {
   explanation: string;
   /** The exact fragment of the message that triggered this signal, if applicable. */
   evidence?: string;
+  /**
+   * True for signals confirmed by an external authoritative source (e.g. a
+   * hit against the CERT Polska Warning List) rather than inferred by a
+   * heuristic. Unlike a heuristic "critical" signal — which is still a
+   * guess, however confident — an authoritative signal means a real
+   * organization already verified this exact domain/indicator is malicious.
+   * Scoring treats this as a hard override straight to Critical (see
+   * scoring.ts), independent of severity math.
+   */
+  authoritative?: boolean;
 }
 
 export interface DetectionResult {
