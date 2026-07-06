@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { RiskLevel } from "@/lib/scam-detector/types";
+import type { DetectionResult } from "@/lib/scam-detector/types";
 
 /**
  * Local, private history of checked messages — opt-in, browser-only.
@@ -9,23 +9,20 @@ import type { RiskLevel } from "@/lib/scam-detector/types";
  * Consistent with the project's privacy stance ("we don't save anything on
  * the server"): this never touches the network, lives entirely in
  * localStorage, and is OFF by default — the user has to explicitly turn it
- * on. Even when enabled, we store a truncated preview of the message
- * rather than the full text, so an accidentally-pasted sensitive fragment
- * doesn't linger indefinitely in browser storage.
+ * on. Because it's opt-in and the whole point is letting the user revisit
+ * exactly what they checked, each entry stores the FULL message and result
+ * (not just a preview) — clicking an entry shows the complete picture.
  */
 
 const HISTORY_KEY = "aiScamDetectorHistory";
 const ENABLED_KEY = "aiScamDetectorHistoryEnabled";
 const MAX_ENTRIES = 20;
-const PREVIEW_LENGTH = 100;
 
 export interface HistoryEntry {
   id: string;
   checkedAt: number;
-  riskLevel: RiskLevel;
-  riskScore: number;
-  messagePreview: string;
-  signalLabels: string[];
+  message: string;
+  result: DetectionResult;
 }
 
 function readHistory(): HistoryEntry[] {
@@ -37,11 +34,6 @@ function readHistory(): HistoryEntry[] {
   } catch {
     return [];
   }
-}
-
-function makePreview(message: string): string {
-  const trimmed = message.trim().replace(/\s+/g, " ");
-  return trimmed.length > PREVIEW_LENGTH ? `${trimmed.slice(0, PREVIEW_LENGTH)}…` : trimmed;
 }
 
 export function useLocalHistory() {
@@ -67,15 +59,13 @@ export function useLocalHistory() {
   }, []);
 
   const addEntry = useCallback(
-    (entry: { message: string; riskLevel: RiskLevel; riskScore: number; signalLabels: string[] }) => {
+    (entry: { message: string; result: DetectionResult }) => {
       if (!enabled) return;
       const newEntry: HistoryEntry = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         checkedAt: Date.now(),
-        riskLevel: entry.riskLevel,
-        riskScore: entry.riskScore,
-        messagePreview: makePreview(entry.message),
-        signalLabels: entry.signalLabels,
+        message: entry.message,
+        result: entry.result,
       };
       setHistory((prev) => {
         const next = [newEntry, ...prev].slice(0, MAX_ENTRIES);

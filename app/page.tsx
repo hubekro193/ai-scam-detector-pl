@@ -64,12 +64,7 @@ export default function HomePage() {
         setError(data.error ?? "Coś poszło nie tak.");
       } else {
         setResult(data as DetectionResult);
-        localHistory.addEntry({
-          message,
-          riskLevel: data.riskLevel,
-          riskScore: data.riskScore,
-          signalLabels: (data.detectedSignals ?? []).map((s: { label: string }) => s.label),
-        });
+        localHistory.addEntry({ message, result: data as DetectionResult });
       }
     } catch {
       setError("Nie udało się połączyć z serwerem. Spróbuj ponownie.");
@@ -151,8 +146,9 @@ export default function HomePage() {
                   onChange={(e) => localHistory.setEnabled(e.target.checked)}
                   className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
-                Zapisuj historię sprawdzonych wiadomości w tej przeglądarce (nigdy nie wysyłane na
-                serwer)
+                Zapisuj historię sprawdzonych wiadomości (pełna treść i wynik) w tej przeglądarce —
+                nigdy nie wysyłane na serwer, w każdej chwili możesz ją wyczyścić
+
               </label>
             )}
 
