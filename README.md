@@ -177,8 +177,12 @@ Na obecnym zbiorze 38 przykładów (21 scam / 17 legalnych wiadomości): **100% 
 
 **Jak chronisz prywatność użytkownika?** Zero trwałego zapisu treści wiadomości — analiza jest bezstanowa. Warstwa AI dostaje tylko wykryte sygnały, nie pełną wiadomość. UI jawnie ostrzega, żeby nie wklejać haseł/kodów BLIK/PESEL. Klucz API nigdy nie trafia do przeglądarki.
 
-**Jakie są ograniczenia?** Patrz sekcja wyżej — w skrócie: kruchość regexów na odmianę słów, brak integracji z realnymi bazami zagrożeń, brak statystycznej walidacji wag scoringu, brak wykrywania faktycznego malware.
+**Jakie są ograniczenia?** Patrz sekcja wyżej — w skrócie: część regexów wciąż nie ma fuzzy fallbacku (tylko te, które już sprawiały problem), integracja z threat intel ograniczona świadomie do jednego źródła (CERT Polska, nie Google Safe Browsing — trade-off prywatności), brak statystycznej walidacji wag scoringu na dużym, niezależnym zbiorze, brak wykrywania faktycznego malware.
 
-**Jak byś to usprawnił z większą ilością czasu?** Patrz "Możliwe usprawnienia" wyżej — priorytet: integracja z Google Safe Browsing/CERT Polska i właściwa ewaluacja precision/recall na większym zbiorze danych.
+**Jak byś to usprawnił z większą ilością czasu?** Patrz "Możliwe usprawnienia" wyżej — priorytet: rozszerzenie fuzzy matching na resztę silnika, CI/CD, i właściwa ewaluacja precision/recall na dużo większym, niezależnym zbiorze danych.
 
 **Czego się nauczyłeś budując to?** Że moje własne testy jednostkowe dawały fałszywe poczucie bezpieczeństwa, dopóki nie przetestowałem silnika na prawdziwych, ręcznie napisanych po polsku wiadomościach — różnica między "działa na moich testach" a "działa naprawdę" okazała się dużo większa, niż się spodziewałem. Nauczyłem się też świadomie projektować architekturę tak, żeby AI nigdy nie było pojedynczym punktem awarii ani jedynym źródłem prawdy w systemie bezpieczeństwa.
+
+## Licencja
+
+MIT — patrz plik [LICENSE](./LICENSE). Kod można swobodnie kopiować, modyfikować i wykorzystywać, także komercyjnie, pod warunkiem zachowania informacji o prawach autorskich.

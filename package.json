@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "AI Scam Detector PL — rule-based + AI-assisted phishing/scam risk detector for Polish-language messages (SMS, email, OLX, Allegro, WhatsApp).",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "next dev",
