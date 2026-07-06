@@ -1,4 +1,5 @@
 import type { Detector, Signal } from "../types";
+import { containsFuzzyPhrase, containsFuzzyWord } from "../fuzzy";
 
 export const detectContextRisk: Detector = (_text, normalized) => {
   const signals: Signal[] = [];
@@ -51,11 +52,18 @@ export const detectContextRisk: Detector = (_text, normalized) => {
   // interact with the message so carrier/OS spam filters and link previews
   // are bypassed. No legitimate courier/bank ever needs you to "activate" a
   // link this way — this phrasing alone is a near-certain scam signature.
-  if (
+  const hasInteractionTrickRegex =
     /(aktyw\w*.{0,30}(link|wiadomos\w*|sms)|(zamknij|zakoncz)\w*.{0,40}otworz\w*.{0,20}(wiadomos\w*|sms|link)|odpowiedz\w*\s*[„"']?[a-z]{1,3}[„"']?\W{0,3}(a\s+)?nastepnie)/.test(
       normalized
-    )
-  ) {
+    );
+  // Fuzzy fallback: this phrasing varies a lot between real smishing
+  // campaigns ("aktywuj"/"aktywacja"/"aktywuje", "otworz"/"otworzyc"...) —
+  // catch inflected forms the regex above doesn't spell out explicitly.
+  const hasInteractionTrickFuzzy =
+    (containsFuzzyWord(normalized, "aktywuj") || containsFuzzyWord(normalized, "aktywacja")) &&
+    (containsFuzzyWord(normalized, "link") || containsFuzzyPhrase(normalized, ["otworz", "wiadomosc"]));
+
+  if (hasInteractionTrickRegex || hasInteractionTrickFuzzy) {
     signals.push({
       id: "context.interaction-trick",
       category: "context",

@@ -23,6 +23,7 @@ app/
 src/lib/scam-detector/
   types.ts            — typy: Signal, DetectionResult, RiskCategory, Severity...
   utils.ts             — normalizacja tekstu, ekstrakcja URL (w tym refang() dla zdefangowanych linków)
+  fuzzy.ts             — dopasowanie rozmyte (Levenshtein) — tolerancja na odmianę słów i literówki
   detectors/           — 7 niezależnych detektorów (link, identity, pressure, data, payment, language, context)
   scoring.ts           — agregacja sygnałów w riskScore/riskLevel/confidence + rekomendowane działania
   schemas.ts           — schematy Zod: walidacja requestu API + kontraktowy test kształtu DetectionResult
@@ -131,7 +132,7 @@ Na obecnym zbiorze 38 przykładów (21 scam / 17 legalnych wiadomości): **100% 
 
 ## Ograniczenia (uczciwie, nie na wyrost)
 
-- **Wykrywanie regexowe jest kruche na odmianę słów.** W trakcie budowy projektu kilkukrotnie znajdowałem sygnały, które nie działały na prawdziwych wiadomościach mimo że przechodziły moje własne testy — bo pisałem przykłady testowe z góry "wyczyszczone" z polskich znaków, zamiast prawdziwej odmiany (`ł` się nie normalizuje przez Unicode NFD, "skanu" nie pasowało do wzorca "skan", "bezpośrednio przelewem" nie pasowało do "przelew bezpośrednio"). Naprawiłem konkretne przypadki, które znalazłem — ale to metoda gry w kotka i myszkę, nie systemowe rozwiązanie. Prawdziwy scamer, testując nowe sformułowanie, może wciąż ominąć regułę.
+- **Wykrywanie regexowe jest częściowo kruche na odmianę słów — teraz częściowo naprawione systemowo.** W trakcie budowy kilkukrotnie znajdowałem sygnały, które nie działały na prawdziwych wiadomościach mimo że przechodziły moje testy — bo pisałem przykłady z góry "wyczyszczone", zamiast prawdziwej odmiany (`ł` się nie normalizuje przez Unicode NFD, "skanu" nie pasowało do wzorca "skan"). Zamiast łatać to pojedynczo za każdym razem, dodałem `src/lib/scam-detector/fuzzy.ts` — dopasowanie na odległości edycyjnej (Levenshteina), tolerancyjne na odmianę i literówki, z progiem skalowanym długością słowa (krótkie słowa jak "kod" celowo NIE są rozmywane, żeby nie kolidować z niepowiązanymi wyrazami). Zastosowane na razie tylko do wzorców, które już realnie sprawiały problem (`dataRequest.ts`, `payment.ts`, `context.ts`) — nie do wszystkich ~45 reguł w silniku. Zdeterminowany scamer testujący naprawdę nietypowe sformułowanie może wciąż ominąć regułę, która nie ma jeszcze fuzzy fallbacku.
 - **Nie wykrywa faktycznego malware/exploitów przeglądarkowych** — tylko wzorce tekstowe i linki phishingowe. Link, który wykrada dane przez lukę w przeglądarce (a nie przez fałszywy formularz), jest poza zakresem tego narzędzia.
 - **Brak integracji z realnymi bazami zagrożeń** (Google Safe Browsing, CERT Polska) — w przeciwieństwie do niektórych komercyjnych narzędzi, sprawdzamy tylko małą, ręcznie utrzymywaną listę znanych marek i podejrzanych końcówek domen.
 - **Brak historii/trwałości** — każde sprawdzenie jest bezstanowe (świadomie, ze względu na prywatność), więc nie da się pokazać "tę wiadomość zgłoszono już 40 razy" ani budować statystyk trendów.

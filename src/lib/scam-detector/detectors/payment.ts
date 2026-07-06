@@ -1,4 +1,5 @@
 import type { Detector, Signal } from "../types";
+import { containsFuzzyPhrase } from "../fuzzy";
 
 interface Pattern {
   id: string;
@@ -6,6 +7,8 @@ interface Pattern {
   severity: Signal["severity"];
   label: string;
   explanation: string;
+  /** Fallback fuzzy phrase checks (see fuzzy.ts) — order/inflection tolerant. */
+  fuzzyPhrases?: string[][];
 }
 
 const PATTERNS: Pattern[] = [
@@ -24,6 +27,14 @@ const PATTERNS: Pattern[] = [
     label: "Płatność poza oficjalną platformą",
     explanation:
       "Wiadomość namawia do zapłaty poza oficjalnym systemem płatności platformy (np. Allegro, OLX). Poza platformą tracisz ochronę kupującego/sprzedającego.",
+    // The regex already covers both word orders explicitly (a real bug we
+    // hit before) — fuzzy phrases add tolerance for typos/inflection on top,
+    // in both directions, instead of hand-writing every combination.
+    fuzzyPhrases: [
+      ["przelew", "bezposrednio"],
+      ["bezposrednio", "przelew"],
+      ["pomijajac", "platnosc"],
+    ],
   },
   {
     id: "payment.already-paid-confirm",
@@ -70,10 +81,15 @@ const PATTERNS: Pattern[] = [
   },
 ];
 
+function matchesPattern(normalized: string, p: Pattern): boolean {
+  if (p.regex.test(normalized)) return true;
+  return (p.fuzzyPhrases ?? []).some((phrase) => containsFuzzyPhrase(normalized, phrase));
+}
+
 export const detectPaymentRisk: Detector = (_text, normalized) => {
   const signals: Signal[] = [];
   for (const p of PATTERNS) {
-    if (p.regex.test(normalized)) {
+    if (matchesPattern(normalized, p)) {
       signals.push({
         id: p.id,
         category: "payment",

@@ -1,4 +1,5 @@
 import type { Detector, Signal } from "../types";
+import { containsFuzzyPhrase } from "../fuzzy";
 
 interface Pattern {
   id: string;
@@ -15,6 +16,12 @@ interface Pattern {
    * and no actual request verb telling the reader to hand something over.
    */
   guarded?: boolean;
+  /**
+   * Fallback fuzzy phrase checks (see fuzzy.ts) — catch inflected word
+   * forms and typos the regex stem misses, without rewriting the regex
+   * into an unreadable pile of alternations. Any phrase matching counts.
+   */
+  fuzzyPhrases?: string[][];
 }
 
 // These are the highest-weight signals in the whole engine: no legitimate
@@ -46,6 +53,7 @@ const PATTERNS: Pattern[] = [
     explanation:
       "Wiadomość prosi o login/hasło do konta — to klasyczny phishing mający wykraść dostęp do Twojego konta bankowego lub innego serwisu.",
     guarded: true,
+    fuzzyPhrases: [["podaj", "haslo"], ["podaj", "login"], ["dane", "logowania"], ["zaloguj", "podaj"]],
   },
   {
     id: "data.sms-code",
@@ -72,6 +80,10 @@ const PATTERNS: Pattern[] = [
     label: "Prośba o skan dowodu osobistego",
     explanation:
       "Wiadomość prosi o przesłanie skanu/zdjęcia dowodu osobistego — dokument ten może posłużyć do wyłudzeń na Twoje dane.",
+    // This exact pattern caused a real bug (Module 10): "skanu dowodu"
+    // didn't match the "skan dowodu" stem. Fuzzy phrase matching as a
+    // fallback catches that whole class of inflection mismatches.
+    fuzzyPhrases: [["skan", "dowodu"], ["zdjecie", "dowodu"], ["przeslij", "dowod"]],
   },
 ];
 
@@ -85,6 +97,11 @@ const DISCLAIMER_REGEX =
 const REQUEST_VERB_REGEX =
   /(podaj\w*|wyslij\w*|przeslij\w*|przekaz\w*|wpisz\w*|dyktuj\w*|powiedz\w*|odczytaj\w*)/;
 
+function matchesPattern(normalized: string, p: Pattern): boolean {
+  if (p.regex.test(normalized)) return true;
+  return (p.fuzzyPhrases ?? []).some((phrase) => containsFuzzyPhrase(normalized, phrase));
+}
+
 export const detectDataRequestRisk: Detector = (_text, normalized) => {
   const signals: Signal[] = [];
 
@@ -93,7 +110,7 @@ export const detectDataRequestRisk: Detector = (_text, normalized) => {
   const looksLikeLegitNotice = hasDisclaimer && !hasRequestVerb;
 
   for (const p of PATTERNS) {
-    if (!p.regex.test(normalized)) continue;
+    if (!matchesPattern(normalized, p)) continue;
     if (p.guarded && looksLikeLegitNotice) continue;
 
     signals.push({
