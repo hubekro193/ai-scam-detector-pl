@@ -7,7 +7,7 @@
 
 Silnik do oceny ryzyka oszustwa/phishingu w polskojęzycznych wiadomościach (SMS, e-mail, OLX, Allegro, WhatsApp, kurier/bank).
 
-**Status: MVP kompletne (Moduły 5-9, 11, 12).** Ewaluacja (Moduł 10) trwa na bieżąco przy każdym nowym teście na realnej wiadomości — to nie jednorazowy etap, tylko ciągły proces.
+**Status: MVP kompletne (Moduły 5-9, 11, 12), plus rozwój po MVP.** Ewaluacja (Moduł 10) trwa na bieżąco przy każdym nowym teście na realnej wiadomości — to nie jednorazowy etap, tylko ciągły proces. Po ukończeniu MVP dodane zostały: dopasowanie rozmyte (fuzzy matching) ograniczające false negatives na odmianie słów, integracja z Listą Ostrzeżeń CERT Polska, CI/CD (GitHub Actions), opcjonalna historia lokalna oraz licencja MIT.
 
 ## Architektura — dlaczego rules + AI, nie tylko AI
 
@@ -15,14 +15,40 @@ Silnik regułowy (`analyzeMessage`) zawsze liczy `riskScore`/`riskLevel`/`detect
 
 Warstwa AI (`explainMessage`, Moduł 6) jest **czysto opisowa** — dostaje tylko listę już wykrytych sygnałów (kategorię, etykietę, krótki fragment-dowód), nigdy pełnej treści wiadomości, i tylko przepisuje `summary` na bardziej naturalny polski. Nie może zmienić oceny ryzyka. Jeśli brak klucza API albo wywołanie się nie powiedzie/przekroczy czas — aplikacja cicho wraca do wyjaśnienia z silnika regułowego. AI nigdy nie jest pojedynczym punktem awarii.
 
+### Diagram
+
+```mermaid
+flowchart TD
+    U["Użytkownik<br/>wkleja wiadomość"] --> UI["Next.js UI<br/>app/page.tsx"]
+    UI -->|"POST /api/check"| API["API Route<br/>rate limit + walidacja Zod"]
+    API --> ENGINE["Silnik regułowy<br/>7 detektorów (Moduł 5)"]
+    CERT[("CERT Polska<br/>Warning List<br/>cache lokalny, 5 min")] -.->|"sprawdzenie domeny<br/>(lokalnie, nic nie wysyłamy)"| ENGINE
+    ENGINE --> SCORING["Scoring<br/>riskScore / riskLevel"]
+    SCORING -->|"tylko wykryte sygnały<br/>NIGDY pełna wiadomość"| AI["Warstwa AI<br/>Claude (opcjonalna)"]
+    SCORING -.->|"brak klucza / błąd / timeout"| RESULT
+    AI --> RESULT["DetectionResult"]
+    RESULT --> UI
+    UI -.->|"opt-in, wyłączone domyślnie"| LS[("localStorage<br/>historia — tylko w przeglądarce")]
+```
+
+Kluczowe decyzje widoczne na diagramie: silnik regułowy zawsze stoi między API a AI (AI nigdy nie decyduje samodzielnie o ryzyku), CERT Polska jest sprawdzany lokalnie (przerywana strzałka = nie blokuje działania przy awarii), a historia lokalna żyje wyłącznie w przeglądarce użytkownika, nigdy na serwerze.
+
 ## Struktura
 
 ```
 app/
-  page.tsx             — główny UI: textarea, wynik, przykłady do wypróbowania
+  page.tsx             — główny UI: textarea, wynik, przykłady do wypróbowania, historia lokalna
   layout.tsx           — layout + metadata
   globals.css          — Tailwind v4
   api/check/route.ts   — jedyne miejsce, gdzie wywoływany jest explainMessage() po stronie serwera
+  components/
+    ScoreRing.tsx         — pierścień wyniku (SVG)
+    ExamplePicker.tsx     — przeglądanie 38 przykładów pogrupowanych wg poziomu ryzyka
+    HistoryPanel.tsx      — lista historii z rozwijanym pełnym wynikiem po kliknięciu
+    Faq.tsx               — sekcja FAQ (accordion)
+    riskStyles.ts         — wspólna mapa kolorów/ikon per poziom ryzyka
+  hooks/
+    useLocalHistory.ts    — opt-in historia w localStorage, nigdy nie wysyłana na serwer
 src/lib/scam-detector/
   types.ts            — typy: Signal, DetectionResult, RiskCategory, Severity...
   utils.ts             — normalizacja tekstu, ekstrakcja URL (w tym refang() dla zdefangowanych linków)
@@ -41,6 +67,8 @@ src/lib/scam-detector/
   __tests__/           — testy vitest (offline, bez potrzeby klucza API)
 src/cli/
   check.ts             — interaktywne CLI: wklej dowolną wiadomość, dostań pełną ocenę
+.github/workflows/
+  ci.yml               — CI: type check + testy + evaluate + build na każdym pushu/PR
 ```
 
 ## Użycie
@@ -108,7 +136,7 @@ Najszybciej: **[ai-scam-detector-pl.vercel.app](https://ai-scam-detector-pl.verc
 npm run dev
 ```
 
-i otwórz `http://localhost:3000` — wklej dowolną wiadomość albo wybierz jeden z 38 przykładów z listy rozwijanej. Alternatywnie `npm run demo` pokaże wynik dla wszystkich przykładów naraz w terminalu, bez uruchamiania serwera.
+i otwórz `http://localhost:3000` — wklej dowolną wiadomość albo kliknij "Przeglądaj przykłady", żeby wybrać jeden z 38, pogrupowanych wg poziomu ryzyka. Możesz też włączyć lokalną historię sprawdzonych wiadomości (checkbox pod polem tekstowym) — zostaje tylko w Twojej przeglądarce, nigdy na serwerze, i można ją wyczyścić jednym kliknięciem. Alternatywnie `npm run demo` pokaże wynik dla wszystkich przykładów naraz w terminalu, bez uruchamiania serwera.
 
 ### Wdrożenie na Vercel (żywy link)
 
@@ -150,7 +178,7 @@ Na obecnym zbiorze 38 przykładów (21 scam / 17 legalnych wiadomości): **100% 
 - **Wykrywanie regexowe jest częściowo kruche na odmianę słów — teraz częściowo naprawione systemowo.** W trakcie budowy kilkukrotnie znajdowałem sygnały, które nie działały na prawdziwych wiadomościach mimo że przechodziły moje testy — bo pisałem przykłady z góry "wyczyszczone", zamiast prawdziwej odmiany (`ł` się nie normalizuje przez Unicode NFD, "skanu" nie pasowało do wzorca "skan"). Zamiast łatać to pojedynczo za każdym razem, dodałem `src/lib/scam-detector/fuzzy.ts` — dopasowanie na odległości edycyjnej (Levenshteina), tolerancyjne na odmianę i literówki, z progiem skalowanym długością słowa (krótkie słowa jak "kod" celowo NIE są rozmywane, żeby nie kolidować z niepowiązanymi wyrazami). Zastosowane na razie tylko do wzorców, które już realnie sprawiały problem (`dataRequest.ts`, `payment.ts`, `context.ts`) — nie do wszystkich ~45 reguł w silniku. Zdeterminowany scamer testujący naprawdę nietypowe sformułowanie może wciąż ominąć regułę, która nie ma jeszcze fuzzy fallbacku.
 - **Nie wykrywa faktycznego malware/exploitów przeglądarkowych** — tylko wzorce tekstowe i linki phishingowe. Link, który wykrada dane przez lukę w przeglądarce (a nie przez fałszywy formularz), jest poza zakresem tego narzędzia.
 - **Integracja z jedną realną bazą zagrożeń (CERT Polska), świadomie nie z Google Safe Browsing.** Domeny sprawdzamy teraz też przeciwko oficjalnej Liście Ostrzeżeń CERT Polska (patrz sekcja "Threat intel" niżej) — ale to jedno źródło, nie kilka. Google Safe Browsing dawałby szerszą, globalną bazę, ale ich prosty Lookup API wymaga wysłania każdego sprawdzanego URL-a do serwerów Google, co kłóciłoby się z zasadą "nic nie wysyłamy nigdzie" tego projektu — świadomie tego nie zaimplementowałem z tego powodu, a nie z braku czasu.
-- **Brak historii/trwałości** — każde sprawdzenie jest bezstanowe (świadomie, ze względu na prywatność), więc nie da się pokazać "tę wiadomość zgłoszono już 40 razy" ani budować statystyk trendów.
+- **Na serwerze nadal brak historii/trwałości** (świadomie, ze względu na prywatność) — nie da się pokazać "tę wiadomość zgłoszono już 40 razy" ani budować statystyk trendów. Jest za to opcjonalna historia **lokalna**, wyłączona domyślnie (`app/hooks/useLocalHistory.ts`) — po włączeniu przechowuje pełną treść sprawdzonych wiadomości (nie tylko skrót) w `localStorage` przeglądarki, żeby kliknięcie w pozycję pokazywało cały wynik. To świadomy trade-off: wygoda kontra to, że ktoś z dostępem do tej samej przeglądarki/urządzenia mógłby zobaczyć te wiadomości — dlatego jest opt-in, a nie włączone domyślnie, i zawsze można ją w jednym kliknięciu wyczyścić.
 - **Wagi scoringu są ręcznie dobrane, nie zwalidowane statystycznie na dużym, niezależnym zbiorze.** Mamy teraz 38 przykładów i policzone precision/recall (patrz sekcja "Ewaluacja" wyżej), ale to wciąż zbiór, który sam projektowałem — 100% na nim nie oznacza 100% w prawdziwym świecie. Kalibracja progów (np. Critical vs High) opiera się na mojej ocenie, nie na held-out teście.
 - **Reguły detekcji są jawne i publiczne** (ten sam kod jest na GitHubie) — zdeterminowany oszust może przeczytać regexy i celowo ich unikać. To klasyczny kompromis open-source vs. security-through-obscurity.
 - **Rate limiter działa tylko w pamięci procesu** (patrz sekcja Prywatność i bezpieczeństwo) — nie skaluje się do wielu instancji bez dodatkowej pracy.
