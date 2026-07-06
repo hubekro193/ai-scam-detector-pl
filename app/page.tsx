@@ -6,7 +6,9 @@ import type { DetectionResult } from "@/lib/scam-detector/types";
 import { ScoreRing } from "./components/ScoreRing";
 import { Faq } from "./components/Faq";
 import { ExamplePicker } from "./components/ExamplePicker";
+import { HistoryPanel } from "./components/HistoryPanel";
 import { RISK_STYLES } from "./components/riskStyles";
+import { useLocalHistory } from "./hooks/useLocalHistory";
 
 const EXAMPLE_IDS = ["courier-topup-scam", "blik-friend-scam", "legit-parcel-notification"];
 const EXAMPLES = TEST_MESSAGES.filter((m) => EXAMPLE_IDS.includes(m.id));
@@ -41,6 +43,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showTechnical, setShowTechnical] = useState(false);
+  const localHistory = useLocalHistory();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,6 +64,12 @@ export default function HomePage() {
         setError(data.error ?? "Coś poszło nie tak.");
       } else {
         setResult(data as DetectionResult);
+        localHistory.addEntry({
+          message,
+          riskLevel: data.riskLevel,
+          riskScore: data.riskScore,
+          signalLabels: (data.detectedSignals ?? []).map((s: { label: string }) => s.label),
+        });
       }
     } catch {
       setError("Nie udało się połączyć z serwerem. Spróbuj ponownie.");
@@ -133,6 +142,19 @@ export default function HomePage() {
               Nie wklejaj haseł, kodów BLIK, numerów kart, CVV ani numeru PESEL — do analizy
               wystarczy treść samej wiadomości.
             </p>
+
+            {localHistory.hydrated && (
+              <label className="flex items-center gap-2 text-xs text-slate-500">
+                <input
+                  type="checkbox"
+                  checked={localHistory.enabled}
+                  onChange={(e) => localHistory.setEnabled(e.target.checked)}
+                  className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                Zapisuj historię sprawdzonych wiadomości w tej przeglądarce (nigdy nie wysyłane na
+                serwer)
+              </label>
+            )}
 
             <div className="flex flex-wrap items-center gap-2 pt-1">
               <button
@@ -240,6 +262,20 @@ export default function HomePage() {
             </section>
           )}
         </section>
+
+        {/* Local history — opt-in, browser-only, never sent to the server */}
+        {localHistory.hydrated && localHistory.enabled && (
+          <section className="mx-auto mt-6 max-w-2xl rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+            <h2 className="text-sm font-semibold text-slate-900">Historia sprawdzonych wiadomości</h2>
+            <div className="mt-3">
+              <HistoryPanel
+                entries={localHistory.history}
+                onRemove={localHistory.removeEntry}
+                onClearAll={localHistory.clearHistory}
+              />
+            </div>
+          </section>
+        )}
 
         {/* How it works: editorial stepped list, oversized ghost numbers */}
         <section className="mt-24">
